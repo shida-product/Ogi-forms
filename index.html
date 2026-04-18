@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>会員登録 | オオギ薬局</title>
+    <meta name="description" content="オオギ薬局の会員登録フォームです。">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="image/oogi_logo.png">
+    <!-- Google Fonts 廃止 (OSネイティブシステムフォントによる超高速・ネイティブアプリライクな表示) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro JP"', '"Helvetica Neue"', 'Roboto', '"Segoe UI"', 'sans-serif'],
+                    },
+                    colors: {
+                        sumi: '#2C2C2C',
+                        primary: '#2563EB',
+                        'primary-dark': '#1D4ED8',
+                        'primary-light': '#EFF6FF',
+                        surface: '#F8FAFC',
+                        'surface-dark': '#F1F5F9',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen bg-surface font-sans text-sumi">
+    <!-- ヘッダー -->
+    <div class="z-30 bg-surface/90 backdrop-blur-sm border-b border-sumi/[0.06]">
+        <div class="max-w-lg mx-auto px-4 py-3">
+            <!-- 店舗名 -->
+            <div class="flex items-center justify-center gap-2">
+                <img src="image/oogi_logo.png" alt="オオギ薬局" class="w-12 h-12 object-contain">
+                <h1 id="store-title" class="text-base font-bold text-sumi/80 tracking-wider">オオギ薬局</h1>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-lg mx-auto pt-6 pb-16 px-4 sm:px-6">
+        <!-- ステップ コンテナ -->
+        <div id="step-container" class="min-h-[55vh] flex flex-col">
+            <!-- ヘッダー -->
+            <header class="mb-8">
+                <h2 id="step-title" class="text-xl sm:text-2xl font-bold tracking-wide text-sumi mb-2"></h2>
+                <p id="step-desc" class="text-sm text-sumi/50 leading-relaxed"></p>
+            </header>
+
+            <!-- フィールドエリア -->
+            <div id="fields-area" class="flex-1 space-y-6"></div>
+        </div>
+
+        <!-- ステッパー（プログレスバー） -->
+        <div id="stepper-container" class="mt-8 mb-4 mx-auto w-full max-w-[320px] px-2" style="display: none;"></div>
+
+        <!-- ナビゲーションボタン -->
+        <div class="mt-8 flex gap-3 w-[70%] min-w-[280px] mx-auto" id="nav-buttons">
+            <button type="button" id="prev-btn" class="hidden flex-none px-5 py-3.5 rounded-xl border border-sumi/10 text-sumi/60 hover:text-sumi hover:border-sumi/20 transition-all text-sm font-medium">
+                <span id="prev-text">戻る</span>
+            </button>
+            <button type="button" id="next-btn" class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3.5 px-6 rounded-xl shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center text-base tracking-wider">
+                <span id="next-text">次へ</span>
+                <svg id="next-arrow" class="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+                <svg id="submit-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <footer class="text-center pt-10 mt-6">
+            <p class="text-sumi/20 text-xs tracking-[0.15em]">オオギ薬局</p>
+        </footer>
+    </main>
+
+    <!-- 送信完了画面 -->
+    <div id="success-modal" class="fixed inset-0 z-[100] flex flex-col items-center justify-center hidden bg-surface">
+        <div class="relative z-10 w-full max-w-md px-6 text-center">
+            <!-- チェックアイコン -->
+            <div class="success-icon-bg w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_8px_30px_rgba(37,99,235,0.15)] opacity-0">
+                <svg class="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path class="success-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+
+            <div class="fade-up" style="animation-delay: 0.5s;">
+                <h2 id="success-title" class="text-2xl sm:text-3xl font-bold tracking-wider text-sumi mb-4"></h2>
+                <div class="w-12 h-[2px] bg-primary mx-auto mb-6 rounded-full"></div>
+                <p id="success-message" class="text-sumi/70 leading-relaxed text-base mb-8"></p>
+                
+                <!-- LINE友だち登録 -->
+                <div id="line-section" class="bg-white border border-sumi/10 rounded-2xl p-5 mb-4 shadow-sm text-left">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="#06C755">
+                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.271.173-.508.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                        </svg>
+                        <span id="line-title" class="text-base font-bold text-sumi"></span>
+                    </div>
+                    <p id="line-desc" class="text-sm text-sumi/60 leading-relaxed mb-4"></p>
+                    <a id="line-add-btn" href="#" target="_blank" rel="noopener noreferrer"
+                       class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white font-medium text-sm tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                       style="background-color: #06C755;">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="white">
+                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.271.173-.508.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                        </svg>
+                        <span id="line-btn-text"></span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-10 fade-up" style="animation-delay: 0.8s;">
+                <p class="text-xs text-sumi/30 tracking-[0.15em]">オオギ薬局</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* ── オオギ薬局 入会フォーム — カスタムスタイル ── */
+
+/* ── アニメーション ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes successPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes lineDraw {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+}
+
+.fade-up { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+.slide-in-right { animation: slideInRight 0.35s ease-out forwards; }
+.slide-in-left  { animation: slideInLeft  0.35s ease-out forwards; }
+.shake { animation: shake 0.4s ease-in-out; }
+
+/* 完了画面 */
+.success-icon-bg { animation: successPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.success-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: lineDraw 0.6s ease-out 0.3s forwards;
+}
+
+/* ── ステッパー ── */
+.stepper-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid #CBD5E1; background: #F1F5F9;
+  transition: all 0.3s ease; flex-shrink: 0; position: relative; z-index: 2;
+}
+.stepper-dot.active {
+  border-color: #2563EB; background: #2563EB;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+.stepper-dot.done { border-color: #2563EB; background: #2563EB; }
+.stepper-line {
+  flex: 1; height: 2px; background: #CBD5E1;
+  transition: background 0.3s ease;
+}
+.stepper-line.done { background: #2563EB; }
+.stepper-label {
+  font-size: 10px; color: #94A3B8; white-space: nowrap;
+  transition: color 0.3s ease;
+  max-width: 64px; text-align: center;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── フォーム入力 ── */
+.form-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px solid #E2E8F0;
+  border-radius: 0;
+  padding: 0.75rem 0.25rem;
+  background: transparent;
+  color: #2C2C2C;
+  font-size: 16px; /* iOSのズーム防止 */
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.form-input:hover { border-bottom-color: #94A3B8; }
+.form-input:focus {
+  border-bottom-color: #2C2C2C; /* Linear Minimal (Pattern B) のフォーカス時はスミ色 */
+  background-color: transparent;
+  box-shadow: none;
+}
+.form-input::placeholder { color: #CBD5E1; }
+
+/* 複数行の記述欄（テキストエリア）は、下線だけだと使いづらいため、極細のリニアボーダーを適用 */
+textarea.form-input { 
+  min-height: 88px; resize: vertical; 
+  border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 0.75rem; 
+}
+textarea.form-input:focus {
+  border-color: #2C2C2C; border-bottom-color: #2C2C2C;
+}
+select.form-input { cursor: pointer; }
+
+/* ── ラジオ（ピル型） ── */
+.pill-radio input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.pill-label {
+  display: block; width: 100%; text-align: center;
+  padding: 0.875rem 1rem; /* タップ領域確保 (約48px以上の高さへ) */
+  border: 2px solid #E2E8F0; border-radius: 0.5rem;
+  font-size: 1rem; font-weight: 700;
+  color: #64748B; background: #FFFFFF;
+  cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none;
+}
+.pill-label:active { transform: scale(0.98); } /* モバイル時の微細なタップ感 */
+.pill-label:hover { border-color: #94A3B8; }
+.pill-radio input[type="radio"]:checked + .pill-label {
+  border-color: #2563EB; color: #FFFFFF;
+  background: #2563EB;
+  box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.3);
+}
+
+/* ── チェックボックス ── */
+/* タップしやすいようコンテナ側のラベルに余白を持たせる想定でサイズ変更 */
+.custom-checkbox {
+  width: 1.5rem; height: 1.5rem; /* 24px */
+  accent-color: #2563EB; cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── フィールドラッパー ── */
+.field-wrapper {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+/* ── インラインバリデーション アイコン ── */
+.valid-icon-wrapper {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #22C55E;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.valid-icon-wrapper.show {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+.valid-icon-wrapper.hide {
+  opacity: 0;
+  transform: translateY(-50%) scale(0.5);
+}
