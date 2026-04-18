@@ -1,36 +1,45 @@
-# oogi-form — オオギ薬局 入会申込フォーム
+# oogi-form — オオギ薬局 会員登録フォーム
 
 ## 概要
 
-Googleフォームで運用していた入会申込フォームを独自フォームに移行したもの。
-QRコード（将来的にNFC）で薬局店頭からアクセスし、スマホで入力する。
+店舗のGoogleフォームで運用していた入会フォームを、モバイル特化型の独自Webフォーム（NFC・QR対応）に移行したプロジェクト。
+フロントエンドを分離し、バックエンドをGASで処理することで、現行の「回答まとめ」スプレッドシートの運用をそのまま引き継ぎながら最新のUI/UXを提供します。
 
 ## 技術スタック
 
 | レイヤー | 技術 |
 |---|---|
-| フロントエンド | HTML / JS / Tailwind CDN |
-| バックエンド/DB | Supabase（PostgreSQL） |
+| フロントエンド | HTML / Vanilla JS / Tailwind CDN |
+| バックエンド | Google Apps Script (GAS) |
+| DB | Google Sheets (回答まとめ、回答NFC) |
 | ホスティング | Cloudflare Pages |
 
 ## URL
 
-- **本番**: `https://oogi-form.pages.dev`
-- **店舗別**: `https://oogi-form.pages.dev?store=shibuya`
-
-## ローカル開発
-
-```bash
-npx serve ./
-```
+- **本番**: `https://oogi-form.pages.dev` （※予定）
+- **店舗別**: `https://oogi-form.pages.dev?store=shibuya` （パラメータで店舗名を切り替え可能）
 
 ## ファイル構成
 
+```text
+oogi-form/
+├── index.html          # 日本語版 フォーム本体
+├── index_en.html       # 英語版 フォーム本体 (仮)
+├── ui-samples.html     # UIデザインとコンポーネントのテスト用モック
+├── css/
+│   └── style.css       # カスタムスタイル (Linear & Solid デザイン)
+├── js/
+│   ├── app.js          # フォームエンジン (DOM生成・バリデーション・送信)
+│   ├── config.js       # 日本語版 設定ファイル (i18n, フィールド定義)
+│   └── config_en.js    # 英語版 設定ファイル
+├── image/              # ロゴ画像などのアセット
+└── gas/
+    ├── server.gs       # バックエンド (doPost エンドポイント / DB保存ロジック)
+    └── utils.gs        # スプレッドシート用ユーティリティ (和暦変換など)
 ```
-├── index.html       # フォーム本体
-├── css/style.css    # カスタムスタイル
-├── js/config.js     # フォーム定義・店舗設定
-├── js/app.js        # フォームエンジン
-├── supabase/        # DBマイグレーション
-└── README.md
-```
+
+## 開発・運用フロー
+
+1. 初期開発やテスト時は `js/app.js` の `MOCK_SUBMIT = true` で通信をモックできます。
+2. デプロイ時は `js/config.js` に本番のGAS Web API URLを設定した上で Cloudflare Pages へアップロードします。
+3. バックエンド (`gas/server.gs`) を更新した際は、連携先のGASプロジェクトにコードを貼り付けて「新しいデプロイ」を行ってください。
