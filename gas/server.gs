@@ -3,24 +3,117 @@
  * Google Apps Script (GAS) バックエンド処理
  */
 
+// セキュリティトークン
+const API_TOKEN = 'oogi-form-secure-token-2026';
+
 // 1. Controller 層: エントリーポイント
 function doPost(e) {
   const lock = LockService.getScriptLock();
+  let payload = null;
   try {
     lock.waitLock(30000);
-    const payload = JSON.parse(e.postData.contents);
+    payload = JSON.parse(e.postData.contents);
+    
+    // トークン検証
+    if (!payload || payload.token !== API_TOKEN) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        status: 'error', 
+        message: 'Forbidden: Invalid API Token' 
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
     
     const processor = new FormProcessor(payload);
     processor.execute();
     
+    // 正常時のSlack通知送信
+    const masterRow = processor.transformer.buildMasterRow();
+    const slackMessage = buildSlackMessage(payload, masterRow, false);
+    sendToSlack(slackMessage);
+    
     return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() }))
+    const errorStr = error.toString();
+    
+    // 【エラー緊急対処】データ保存失敗時、入力データをSlackに緊急エスケープ通知
+    if (payload) {
+      try {
+        const transformer = new DataTransformer(payload);
+        const masterRow = transformer.buildMasterRow();
+        const emergencyMessage = buildSlackMessage(payload, masterRow, true, errorStr);
+        sendToSlack(emergencyMessage);
+      } catch (innerError) {
+        sendToSlack(`⚠️ *【緊急・システムエラー】入会フォームの処理中に深刻なエラーが発生しました。*\nエラー: \`${errorStr}\`\n生データ: \`${e.postData.contents}\``);
+      }
+    } else {
+      sendToSlack(`⚠️ *【緊急・システムエラー】JSONパース前のフェーズでエラーが発生しました。*\nエラー: \`${errorStr}\``);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: errorStr }))
       .setMimeType(ContentService.MimeType.JSON);
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Slackへメッセージを送信する共通関数
+ */
+function sendToSlack(message) {
+  const webhookUrl = PropertiesService.getScriptProperties().getProperty('SLACK_WEBHOOK_URL');
+  if (!webhookUrl) {
+    Logger.log('SLACK_WEBHOOK_URL が設定されていません');
+    return;
+  }
+  try {
+    UrlFetchApp.fetch(webhookUrl, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ text: message })
+    });
+  } catch (e) {
+    Logger.log('Slack送信失敗: ' + e.toString());
+  }
+}
+
+/**
+ * 送信されたデータからSlack送信用メッセージを組み立てる
+ */
+function buildSlackMessage(payload, masterRow, isError, errorMessage) {
+  const storeCode = payload.store || 'unknown';
+  const storeName = storeCode === 'shibuya' ? '渋谷店' : storeCode;
+  const lang = payload.lang === 'ja' ? '日本語' : '英語';
+  
+  let headerText = '';
+  if (isError) {
+    headerText = `⚠️ *【緊急・システムエラー】スプレッドシートへの保存に失敗しました！*\n` +
+                 `エラー内容: \`${errorMessage}\`\n` +
+                 `※データ消失防止のため、入力内容をここに通知します。店舗スタッフは手動でスプレッドシートに転記してください。\n\n`;
+  } else {
+    headerText = `📢 *【入会申込】NFCフォームから登録がありました（${lang}・${storeName}）*\n\n`;
+  }
+
+  const HEADERS = [
+    '送信日時', 'お名前', 'フリガナ', '生年月日', '性別', '電話番号', '郵便番号', '住所', 'メールアドレス', 'ご職業/職種',
+    'Q1 副作用歴', 'Q2 副作用詳細', 'Q3 アレルギー歴', 'Q4 アレルギー詳細', 'Q5 治療中の病気', 'Q6 治療中の病気の内容', 
+    'Q7 処方薬の服用', 'Q8 処方薬の内容', 'Q9 既往歴（大きな病気）', 'Q10 既往歴の内容', 'Q11 市販薬・サプリ', 'Q12 市販薬・サプリの内容', 
+    'Q13 妊娠の有無', 'Q14 妊娠の詳細', 'Q15 授乳の有無', 'Q16 その他チェック項目', 'アンケート',
+    '国籍(EN)', '滞在ステータス(EN)', '来局動機(EN)'
+  ];
+
+  const lines = [];
+  for (let i = 0; i < masterRow.length; i++) {
+    const val = masterRow[i];
+    if (val !== undefined && val !== null && val !== '') {
+      let displayVal = String(val);
+      if (displayVal.startsWith("'")) {
+        displayVal = displayVal.substring(1);
+      }
+      lines.push(`• *${HEADERS[i]}*: ${displayVal}`);
+    }
+  }
+
+  return headerText + lines.join('\n');
 }
 
 // フォーム処理のオーケストレーター

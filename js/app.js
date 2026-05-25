@@ -23,6 +23,28 @@ const state = {
   store: null,
 };
 
+// ── ローカルストレージ一時保存・復元 ──
+const STORAGE_KEY = 'oogi_form_answers';
+
+function saveAnswers() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.answers));
+}
+
+function loadAnswers() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      state.answers = JSON.parse(saved);
+    } catch (e) {
+      console.warn('保存された回答データの読み込みに失敗しました:', e);
+    }
+  }
+}
+
+function clearAnswers() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 // 表示対象セクション（条件によって自動スキップ）
 function getVisibleSections() {
   const allSections = Object.keys(T.sections).map(Number);
@@ -88,6 +110,7 @@ function formatPhoneNumber(digits) {
 // ── 初期化 ──
 document.addEventListener('DOMContentLoaded', () => {
   initStore();
+  loadAnswers();
   renderStep(state.currentStep);
   initNavigation();
 });
@@ -300,6 +323,7 @@ function createTextInput(field) {
       state.answers[field.id] = e.target.value;
     }
     clearError(field.id);
+    saveAnswers();
   });
 
   container.appendChild(input);
@@ -322,6 +346,7 @@ function createTextarea(field) {
   textarea.addEventListener('input', (e) => {
     state.answers[field.id] = e.target.value;
     clearError(field.id);
+    saveAnswers();
   });
 
   container.appendChild(textarea);
@@ -347,6 +372,7 @@ function createRadioGroup(field) {
       state.answers[field.id] = optionKey;
       clearError(field.id);
       rerenderConditionalFields();
+      saveAnswers();
     });
 
     const span = document.createElement('span');
@@ -389,6 +415,7 @@ function createCheckboxGroup(field) {
       }
       clearError(field.id);
       rerenderConditionalFields();
+      saveAnswers();
     });
 
     const span = document.createElement('span');
@@ -417,6 +444,7 @@ function createCheckboxGroup(field) {
 
     otherInput.addEventListener('input', (e) => {
       state.answers[otherKey] = e.target.value;
+      saveAnswers();
     });
 
     otherWrapper.appendChild(otherInput);
@@ -440,6 +468,7 @@ function createSingleCheckbox(field) {
   input.addEventListener('change', () => {
     state.answers[field.id] = input.checked;
     clearError(field.id);
+    saveAnswers();
   });
 
   const textWrapper = document.createElement('div');
@@ -547,6 +576,7 @@ function createDateSelect(field) {
     if (y && m && d) {
       state.answers[field.id] = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       clearError(field.id);
+      saveAnswers();
     }
   };
 
@@ -612,6 +642,7 @@ function createPostalCodeInput(field) {
     // ハイフン自動挿入（3桁-4桁）
     e.target.value = digits.length > 3 ? digits.substring(0, 3) + '-' + digits.substring(3, 7) : digits;
     clearError(field.id);
+    saveAnswers();
 
     if (digits.length === 7) {
       await fetchAddress(digits);
@@ -662,6 +693,7 @@ async function fetchAddress(postalCode) {
       const result = data.results[0];
       const address = `${result.address1}${result.address2}${result.address3}`;
       state.answers.address = address;
+      saveAnswers();
 
       const addressField = document.getElementById('address');
       if (addressField) {
@@ -749,6 +781,7 @@ function rerenderConditionalFields() {
 
         delete state.answers[field.id];
         if (field.hasOther) delete state.answers[`${field.id}_other`];
+        saveAnswers();
       }
     }
   });
@@ -917,8 +950,6 @@ function clearError(fieldId) {
   if (el) el.classList.add('hidden');
 }
 
-
-
 // ── フォーム送信 ──
 async function submitForm() {
   const nextBtn = document.getElementById('next-btn');
@@ -932,7 +963,8 @@ async function submitForm() {
   try {
     const payload = {
       store: state.store,
-      lang: isEnglish ? 'en' : 'ja',
+      lang: isEN ? 'en' : 'ja',
+      token: CONFIG.apiToken,
       answers: { ...state.answers },
       submitted_at: new Date().toISOString(),
       user_agent: navigator.userAgent,
@@ -940,6 +972,7 @@ async function submitForm() {
 
     if (MOCK_SUBMIT) {
       console.log('📋 [DEV] 送信データ:', payload);
+      clearAnswers();
       showSuccess();
       return;
     }
@@ -951,6 +984,7 @@ async function submitForm() {
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    clearAnswers();
     showSuccess();
   } catch (err) {
     console.error('送信エラー:', err);
