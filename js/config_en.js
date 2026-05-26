@@ -195,7 +195,7 @@ export const CONFIG = {
       1: 'Personal Information',
       2: 'Health Status',
       3: 'Women\'s Health',
-      4: 'Final Details & Consent',
+      4: 'Survey & Membership',
     },
     stepperLabels: {
       1: 'Profile',
@@ -207,7 +207,7 @@ export const CONFIG = {
       1: 'Please provide your basic information.',
       2: 'Please answer questions about your current health status.',
       3: '(For female patients only)',
-      4: 'Please review the information below and agree to our privacy policy.',
+      4: 'Just a quick survey, and a look at your new membership card.',
     },
     
     // Labels
