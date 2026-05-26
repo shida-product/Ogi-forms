@@ -49,15 +49,15 @@
   transition: all 0.3s ease; flex-shrink: 0; position: relative; z-index: 2;
 }
 .stepper-dot.active {
-  border-color: #2563EB; background: #2563EB;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  border-color: #5DA98F; background: #5DA98F;
+  box-shadow: 0 0 0 4px rgba(93, 169, 143, 0.12);
 }
-.stepper-dot.done { border-color: #2563EB; background: #2563EB; }
+.stepper-dot.done { border-color: #5DA98F; background: #5DA98F; }
 .stepper-line {
   flex: 1; height: 2px; background: #CBD5E1;
   transition: background 0.3s ease;
 }
-.stepper-line.done { background: #2563EB; }
+.stepper-line.done { background: #5DA98F; }
 .stepper-label {
   font-size: 10px; color: #94A3B8; white-space: nowrap;
   transition: color 0.3s ease;
@@ -114,16 +114,16 @@ select.form-input { cursor: pointer; }
 .pill-label:active { transform: scale(0.98); } /* モバイル時の微細なタップ感 */
 .pill-label:hover { border-color: #94A3B8; }
 .pill-radio input[type="radio"]:checked + .pill-label {
-  border-color: #2563EB; color: #FFFFFF;
-  background: #2563EB;
-  box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.3);
+  border-color: #5DA98F; color: #FFFFFF;
+  background: #5DA98F;
+  box-shadow: 0 4px 10px -2px rgba(93, 169, 143, 0.3);
 }
 
 /* ── チェックボックス ── */
 /* タップしやすいようコンテナ側のラベルに余白を持たせる想定でサイズ変更 */
 .custom-checkbox {
   width: 1.5rem; height: 1.5rem; /* 24px */
-  accent-color: #2563EB; cursor: pointer;
+  accent-color: #5DA98F; cursor: pointer;
   flex-shrink: 0;
 }
 
