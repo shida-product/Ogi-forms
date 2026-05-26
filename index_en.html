@@ -33,16 +33,14 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="min-h-screen bg-surface font-sans text-sumi">
-    <!-- ステッパー ヘッダー -->
+    <!-- ヘッダー -->
     <div class="z-30 bg-surface/90 backdrop-blur-sm border-b border-sumi/[0.06]">
-        <div class="max-w-lg mx-auto px-4 pt-4 pb-3">
+        <div class="max-w-lg mx-auto px-4 py-3">
             <!-- 店舗名 -->
-            <div class="flex items-center justify-center gap-2 mb-4">
-                <img src="image/oogi_logo.png" alt="Oogi Pharmacy" class="w-16 h-16 object-contain">
+            <div class="flex items-center justify-center gap-2">
+                <img src="image/oogi_logo.png" alt="Oogi Pharmacy" class="w-12 h-12 object-contain">
                 <h1 id="store-title" class="text-base font-bold text-sumi/80 tracking-wider">Oogi Pharmacy</h1>
             </div>
-            <!-- ステッパー -->
-            <div id="stepper-container"></div>
         </div>
     </div>
 
@@ -51,7 +49,6 @@
         <div id="step-container" class="min-h-[55vh] flex flex-col">
             <!-- ヘッダー -->
             <header class="mb-8">
-                <div class="w-8 h-[2px] bg-primary rounded-full mb-4"></div>
                 <h2 id="step-title" class="text-xl sm:text-2xl font-bold tracking-wide text-sumi mb-2"></h2>
                 <p id="step-desc" class="text-sm text-sumi/50 leading-relaxed"></p>
             </header>
@@ -60,8 +57,11 @@
             <div id="fields-area" class="flex-1 space-y-6"></div>
         </div>
 
+        <!-- ステッパー（プログレスバー） -->
+        <div id="stepper-container" class="mt-8 mb-4 mx-auto w-full max-w-[320px] px-2" style="display: none;"></div>
+
         <!-- ナビゲーションボタン -->
-        <div class="mt-10 flex gap-3 w-[70%] min-w-[280px] mx-auto" id="nav-buttons">
+        <div class="mt-8 flex gap-3 w-[70%] min-w-[280px] mx-auto" id="nav-buttons">
             <button type="button" id="prev-btn" class="hidden flex-none px-5 py-3.5 rounded-xl border border-sumi/10 text-sumi/60 hover:text-sumi hover:border-sumi/20 transition-all text-sm font-medium">
                 <span id="prev-text">Back</span>
             </button>

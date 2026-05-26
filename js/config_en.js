@@ -192,12 +192,6 @@ export const CONFIG = {
       required: false,
       section: 4,
     },
-    {
-      id: 'privacy_agreement',
-      type: 'checkbox',
-      required: true,
-      section: 4,
-    },
   ],
 
   // Text Dictionary
@@ -250,7 +244,6 @@ export const CONFIG = {
       other_info: 'Is there any other information you would like to share?',
       referral_source: 'How did you hear about us?',
       membership_info: 'About Membership',
-      privacy_agreement: 'Privacy Policy Agreement',
     },
 
     // Options
@@ -296,7 +289,6 @@ export const CONFIG = {
       full_name: 'Please enter your full name as it appears on your passport (A–Z only).',
       address_hotel: '※ Just the hotel name is OK! (Or you can paste the full address from Google Maps)',
       postal_code: 'Entering your 7-digit Zip Code will automatically fill in your Prefecture and City (in Japanese).',
-      privacy_agreement: 'Your information will only be used for pharmacy operations such as dispensing and medication guidance. It will not be shared with third parties.',
     },
 
     // Date Select Labels
@@ -343,6 +335,7 @@ export const CONFIG = {
       main: 'We ask all first-time visitors to complete this registration form.',
       content: '[ Information Needed ]\n- Personal & Contact Info\n- Current Address in Japan\n- Allergies & Health Status\n- Current Medications',
       time: 'Estimated time: 3 mins',
+      privacyNote: '* Your personal information will be strictly managed in accordance with our privacy policy and will never be disclosed or shared with third parties without your consent.',
     },
 
     // Info components special content
