@@ -172,12 +172,6 @@ export const CONFIG = {
 
     // === Section 4: Survey & Membership ===
     {
-      id: 'other_info',
-      type: 'textarea',
-      required: false,
-      section: 4,
-    },
-    {
       id: 'referral_source',
       type: 'radio',
       required: false,
@@ -241,7 +235,6 @@ export const CONFIG = {
       breastfeeding: 'Are you currently breastfeeding?',
       breastfeeding_detail: 'How old is your baby (in months)?',
       
-      other_info: 'Is there any other information you would like to share?',
       referral_source: 'How did you hear about us?',
       membership_info: 'About Membership',
     },
@@ -279,7 +272,6 @@ export const CONFIG = {
       allergy_detail: 'e.g. Peanuts, Penicillin',
       current_medicine_detail: 'e.g. Aspirin 100mg, Vitamin C',
       current_disease_detail: 'e.g. Asthma, Hypertension',
-      other_info: 'e.g. past surgeries, family medical history, etc.',
       pregnant_detail: 'e.g. 12 weeks',
       breastfeeding_detail: 'e.g. 6 months',
     },

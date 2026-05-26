@@ -222,8 +222,8 @@ class DataTransformer {
     let q15 = this.translate(this.ans.breastfeeding);
     if (q15 === 'はい' && this.ans.breastfeeding_detail) q15 += `（${this.ans.breastfeeding_detail}）`;
     
-    // Q16: JA はチェックボックス群（lifestyle）、EN は自由記述（other_info）を充てる
-    const q16 = this.isJa ? this.translate(this.ans.lifestyle) : (this.ans.other_info || '');
+    // Q16: JA はチェックボックス群（lifestyle）、EN は対応する設問がないため空欄
+    const q16 = this.isJa ? this.translate(this.ans.lifestyle) : '';
     
     let q17 = this.translate(this.ans.referral_source);
     if (this.ans.referral_source_other) q17 += `（${this.ans.referral_source_other}）`;
