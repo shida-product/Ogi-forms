@@ -1,5 +1,5 @@
 /**
- * Oogi Pharmacy Enrollment Form (English)
+ * Ogi Pharmacy Enrollment Form (English)
  * Field definitions & i18n dictionary
  */
 
@@ -13,13 +13,13 @@ export const CONFIG = {
 
   // Pharmacy Information
   pharmacy: {
-    name: 'Oogi Pharmacy',
+    name: 'Ogi Pharmacy',
     tagline: 'Membership Registration',
   },
 
   // Stores
   stores: {
-    shibuya: { name: 'Shibuya', label: 'Oogi Pharmacy Shibuya' },
+    shibuya: { name: 'Shibuya', label: 'Ogi Pharmacy Shibuya' },
   },
   defaultStore: 'shibuya',
 
@@ -323,7 +323,7 @@ export const CONFIG = {
 
     // Intro
     intro: {
-      greeting: 'Welcome to Oogi Pharmacy',
+      greeting: 'Welcome to Ogi Pharmacy',
       main: 'We ask all first-time visitors to complete this registration form.',
       content: '[ Information Needed ]\n- Personal & Contact Info\n- Current Address in Japan\n- Allergies & Health Status\n- Current Medications',
       time: 'Estimated time: 3 mins',
