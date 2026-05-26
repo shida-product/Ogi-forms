@@ -13,7 +13,7 @@ const MASTER_HEADERS = [
   'Q1 副作用歴', 'Q2 副作用詳細', 'Q3 アレルギー歴', 'Q4 アレルギー詳細', 'Q5 治療中の病気', 'Q6 治療中の病気の内容',
   'Q7 処方薬の服用', 'Q8 処方薬の内容', 'Q9 既往歴（大きな病気）', 'Q10 既往歴の内容', 'Q11 市販薬・サプリ', 'Q12 市販薬・サプリの内容',
   'Q13 妊娠の有無', 'Q14 妊娠の詳細', 'Q15 授乳の有無', 'Q16 その他チェック項目', 'アンケート',
-  '国籍(EN)', '滞在ステータス(EN)', '来局動機(EN)'
+  '国籍(EN)', '滞在ステータス(EN)', '言語'
 ];
 
 // 1. Controller 層: エントリーポイント
@@ -151,7 +151,9 @@ class DataTransformer {
       lifestyle_none: '特に該当しない',
       search_medicine: 'くすりの名前で検索', ad: 'ネット広告', x_twitter: 'X（旧Twitter）', instagram: 'Instagram', youtube: 'YouTube',
       family: '家族の紹介', friend: '知人の紹介', hospital: '近隣の病院・薬局からの紹介', passerby: '通りすがり', map: '地図アプリ', flyer: 'チラシ', search_other: 'くすり以外のワードで検索',
-      tourism: '観光', business: '短期ビジネス', resident: '在住者', student: '留学生', other: 'その他', 
+      // EN版 referral_source 選択肢の和訳（config_en.js: map / search_medicine / referral / walked_by / other_survey）
+      referral: '友人・家族の紹介', walked_by: '通りすがり', other_survey: 'その他',
+      tourism: '観光', business: '短期ビジネス', resident: '在住者', student: '留学生', other: 'その他',
       yes: 'はい', no: 'いいえ', male: '男', female: '女'
     };
   }
@@ -176,7 +178,12 @@ class DataTransformer {
     // C〜L: 基本情報
     const nameKanji = this.isJa ? this.ans.name_kanji : this.ans.full_name;
     const nameKana  = this.isJa ? this.ans.name_kana : '';
-    const birth     = this.isJa ? this.ans.birth_date : (this.ans.dob_year ? `${this.ans.dob_year}/${this.ans.dob_month}/${this.ans.dob_day}` : this.ans.birth_date);
+    // 生年月日：EN 版の旧 Google フォームは dob_year/month/day の 3 分割形式だったため後方互換で受け取り、
+    // 新システムは birth_date（YYYY-MM-DD）に統一済み。出力は YYYY/MM/DD で揃える。
+    const rawBirth  = this.ans.dob_year
+      ? `${this.ans.dob_year}/${this.ans.dob_month}/${this.ans.dob_day}`
+      : (this.ans.birth_date || '');
+    const birth     = String(rawBirth).replace(/-/g, '/');
     const zip       = this.isJa ? this.ans.postal_code : (this.ans.postal_code || '');
     const addr      = this.isJa ? `${this.ans.address || ''}${this.ans.address_detail || ''}` : `${this.ans.address || this.ans.address_hotel || ''} ${this.ans.address_detail || ''}`.trim();
     const phone     = this.isJa ? this.ans.phone : '';
@@ -211,21 +218,22 @@ class DataTransformer {
     let q15 = this.translate(this.ans.breastfeeding);
     if (q15 === 'はい' && this.ans.breastfeeding_detail) q15 += `（${this.ans.breastfeeding_detail}）`;
     
-    const q16 = this.translate(this.ans.lifestyle);
+    // Q16: JA はチェックボックス群（lifestyle）、EN は自由記述（other_info）を充てる
+    const q16 = this.isJa ? this.translate(this.ans.lifestyle) : (this.ans.other_info || '');
     
     let q17 = this.translate(this.ans.referral_source);
     if (this.ans.referral_source_other) q17 += `（${this.ans.referral_source_other}）`;
 
-    // AD〜AF: 英語フォーム専用フィールド
+    // AD〜AF: 英語フォーム由来の追加情報（JA 版では原則空欄）
     const nat = this.isJa ? '' : this.ans.nationality;
     const res = this.isJa ? '' : this.translate(this.ans.residence_status);
-    const motive = '';
+    const langCell = this.isJa ? '' : 'English';
 
     // 計30要素を配列にして返す（「回答まとめ」シートのC列〜AF列に対応）
     const rawArray = [
       timestamp, nameKanji, nameKana, birth, this.translate(this.ans.sex), phone, zip, addr, email, occ,
       q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17,
-      nat || '', res || '', motive || ''
+      nat || '', res || '', langCell
     ];
 
     // スプレッドシートの数式インジェクション（CSV Injection）対策

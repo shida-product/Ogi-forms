@@ -124,18 +124,18 @@ export const CONFIG = {
       condition: (answers) => answers.current_medicine === 'yes',
     },
     {
-      id: 'chronic_condition',
+      id: 'current_disease',
       type: 'radio',
       required: true,
       section: 2,
       options: ['yes', 'no'],
     },
     {
-      id: 'chronic_condition_detail',
+      id: 'current_disease_detail',
       type: 'textarea',
       required: true,
       section: 2,
-      condition: (answers) => answers.chronic_condition === 'yes',
+      condition: (answers) => answers.current_disease === 'yes',
     },
 
     // === Section 3: Women's Health ===
@@ -171,6 +171,12 @@ export const CONFIG = {
     },
 
     // === Section 4: Survey & Membership ===
+    {
+      id: 'other_info',
+      type: 'textarea',
+      required: false,
+      section: 4,
+    },
     {
       id: 'referral_source',
       type: 'radio',
@@ -233,14 +239,15 @@ export const CONFIG = {
       allergy_detail: 'Please specify',
       current_medicine: 'Are you currently taking any medications or supplements?',
       current_medicine_detail: 'Please list them',
-      chronic_condition: 'Are you currently receiving treatment for any medical conditions?',
-      chronic_condition_detail: 'Please specify',
+      current_disease: 'Are you currently receiving treatment for any medical conditions?',
+      current_disease_detail: 'Please specify',
       
       pregnant: 'Are you pregnant or possibly pregnant?',
       pregnant_detail: 'How many weeks?',
       breastfeeding: 'Are you currently breastfeeding?',
       breastfeeding_detail: 'How old is your baby (in months)?',
       
+      other_info: 'Is there any other information you would like to share?',
       referral_source: 'How did you hear about us?',
       membership_info: 'About Membership',
       privacy_agreement: 'Privacy Policy Agreement',
@@ -278,7 +285,8 @@ export const CONFIG = {
       address_detail: 'e.g. 1-2-3 Ebisu, ABC Condominium #101',
       allergy_detail: 'e.g. Peanuts, Penicillin',
       current_medicine_detail: 'e.g. Aspirin 100mg, Vitamin C',
-      chronic_condition_detail: 'e.g. Asthma, Hypertension',
+      current_disease_detail: 'e.g. Asthma, Hypertension',
+      other_info: 'e.g. past surgeries, family medical history, etc.',
       pregnant_detail: 'e.g. 12 weeks',
       breastfeeding_detail: 'e.g. 6 months',
     },
