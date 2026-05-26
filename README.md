@@ -17,14 +17,23 @@
 
 ## URL
 
-- **本番**: `https://oogi-form.pages.dev`
-- **店舗別**: `https://oogi-form.pages.dev/?store=shibuya`（パラメータで店舗名を切り替え）
+本番ドメイン：`https://ogi-forms.pages.dev`
+
+| 店舗 | 言語 | URL |
+|---|---|---|
+| 渋谷店 | 日本語 | `https://ogi-forms.pages.dev/shibuya` |
+| 渋谷店 | English | `https://ogi-forms.pages.dev/shibuya/en` |
+| 恵比寿店 | 日本語 | `https://ogi-forms.pages.dev/ebisu`（**後日実装**） |
+| 恵比寿店 | English | `https://ogi-forms.pages.dev/ebisu/en`（**後日実装**） |
+
+ルーティングは `_redirects` で実現。内部的には `index.html?store=<店舗>` / `index_en.html?store=<店舗>` にリライトされる。
 
 ## ファイル構成
 
 ```text
-oogi-form/
+Ogi-forms/
 ├── .gitignore
+├── _redirects          # Cloudflare Pages URLルーティング（パス方式）
 ├── README.md
 ├── index.html          # 日本語版 フォーム本体
 ├── index_en.html       # 英語版 フォーム本体
@@ -32,7 +41,7 @@ oogi-form/
 │   └── style.css       # カスタムスタイル（Linear & Solid デザイン）
 ├── js/
 │   ├── app.js          # フォームエンジン（DOM生成・バリデーション・一時保存・送信）
-│   ├── config.js       # 日本語版 設定（i18n、フィールド定義、APIトークン、GAS URL）
+│   ├── config.js       # 日本語版 設定（i18n、フィールド定義、APIトークン、GAS URL、店舗設定）
 │   └── config_en.js    # 英語版 設定
 ├── image/              # ロゴ画像
 └── gas/
