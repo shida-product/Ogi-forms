@@ -6,6 +6,16 @@
 // セキュリティトークン
 const API_TOKEN = 'ogi-forms-prod-dfbd023c40ce3bcc';
 
+// 「回答まとめ」シート C 列以降の 30 列、および「回答（NFC）」シートの整形列に
+// 共通で使うヘッダー定義。buildMasterRow() が返す配列と並びを 1:1 で合わせる。
+const MASTER_HEADERS = [
+  '送信日時', 'お名前', 'フリガナ', '生年月日', '性別', '電話番号', '郵便番号', '住所', 'メールアドレス', 'ご職業/職種',
+  'Q1 副作用歴', 'Q2 副作用詳細', 'Q3 アレルギー歴', 'Q4 アレルギー詳細', 'Q5 治療中の病気', 'Q6 治療中の病気の内容',
+  'Q7 処方薬の服用', 'Q8 処方薬の内容', 'Q9 既往歴（大きな病気）', 'Q10 既往歴の内容', 'Q11 市販薬・サプリ', 'Q12 市販薬・サプリの内容',
+  'Q13 妊娠の有無', 'Q14 妊娠の詳細', 'Q15 授乳の有無', 'Q16 その他チェック項目', 'アンケート',
+  '国籍(EN)', '滞在ステータス(EN)', '来局動機(EN)'
+];
+
 // 1. Controller 層: エントリーポイント
 function doPost(e) {
   const lock = LockService.getScriptLock();
@@ -93,14 +103,6 @@ function buildSlackMessage(payload, masterRow, isError, errorMessage) {
     headerText = `📢 *【入会申込】NFCフォームから登録がありました（${lang}・${storeName}）*\n\n`;
   }
 
-  const HEADERS = [
-    '送信日時', 'お名前', 'フリガナ', '生年月日', '性別', '電話番号', '郵便番号', '住所', 'メールアドレス', 'ご職業/職種',
-    'Q1 副作用歴', 'Q2 副作用詳細', 'Q3 アレルギー歴', 'Q4 アレルギー詳細', 'Q5 治療中の病気', 'Q6 治療中の病気の内容', 
-    'Q7 処方薬の服用', 'Q8 処方薬の内容', 'Q9 既往歴（大きな病気）', 'Q10 既往歴の内容', 'Q11 市販薬・サプリ', 'Q12 市販薬・サプリの内容', 
-    'Q13 妊娠の有無', 'Q14 妊娠の詳細', 'Q15 授乳の有無', 'Q16 その他チェック項目', 'アンケート',
-    '国籍(EN)', '滞在ステータス(EN)', '来局動機(EN)'
-  ];
-
   const lines = [];
   for (let i = 0; i < masterRow.length; i++) {
     const val = masterRow[i];
@@ -109,7 +111,7 @@ function buildSlackMessage(payload, masterRow, isError, errorMessage) {
       if (displayVal.startsWith("'")) {
         displayVal = displayVal.substring(1);
       }
-      lines.push(`• *${HEADERS[i]}*: ${displayVal}`);
+      lines.push(`• *${MASTER_HEADERS[i]}*: ${displayVal}`);
     }
   }
 
@@ -248,17 +250,20 @@ class Repository {
     const storeObj = payload.store || 'unknown';
     const storeName = typeof storeObj === 'string' ? storeObj : '不明';
 
-    // 1. NFC専用シートへの振り分け書き込み
+    // 1. 「回答（NFC）」シートへの書き込み
+    //    列構成： A=店舗 / B=言語 / C〜AF=整形 30 列（MASTER_HEADERS と一致）/ AG=生 JSON
+    //    末尾に生 JSON を残すことで「整形済みで見やすく、生データも復旧用に確保」を両立する。
     const nfcSheetName = '回答（NFC）';
+    const NFC_HEADERS = ['店舗', '言語', ...MASTER_HEADERS, '生データ (JSON)'];
     let nfcSheet = this.ss.getSheetByName(nfcSheetName);
     if (!nfcSheet) {
       nfcSheet = this.ss.insertSheet(nfcSheetName);
-      nfcSheet.appendRow(['送信日時', '店舗', '生データ (JSON)']);
-      nfcSheet.getRange('A1:C1').setFontWeight('bold').setBackground('#f3f4f6');
+      nfcSheet.appendRow(NFC_HEADERS);
+      nfcSheet.getRange(1, 1, 1, NFC_HEADERS.length).setFontWeight('bold').setBackground('#f3f4f6');
       nfcSheet.setFrozenRows(1);
     }
-    // バックアップ用としてNFCシートにJSONをそのままダンプ
-    nfcSheet.appendRow([timestamp, storeName, JSON.stringify(payload.answers || {})]);
+    const langDisplay = (payload.lang === 'ja' ? '日本語' : '英語');
+    nfcSheet.appendRow([storeName, langDisplay, ...masterRow, JSON.stringify(payload.answers || {})]);
 
     // 2. 「回答まとめ」シートへの統合書き込み
     const masterSheetName = '回答まとめ';
