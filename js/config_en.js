@@ -236,7 +236,7 @@ export const CONFIG = {
       breastfeeding_detail: 'How old is your baby (in months)?',
       
       referral_source: 'How did you hear about us?',
-      membership_info: 'About Membership',
+      membership_info: '',
     },
 
     // Options
@@ -331,10 +331,12 @@ export const CONFIG = {
     },
 
     // Info components special content
+    // 会員カード説明は画像（image/membership_card.png）内に全テキストを焼き込んでいるため、
+    // 画面表示用の text / label は空にして画像のみを表示する。
     info: {
       membership_info: {
-        text: 'We issue a Membership Card to all new patients.\nShow this card on your next visit within a year, and your basic pharmacy fee will be waived — you\'ll only pay for your medication.',
-        image: 'image/Member_card.png',
+        text: '',
+        image: 'image/membership_card.png',
         alt: 'Membership Card'
       }
     }
