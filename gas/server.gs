@@ -167,7 +167,9 @@ class DataTransformer {
    * 副作用やアレルギーの「はい/いいえ」と「詳細」を別のセルに分ける。
    */
   buildMasterRow() {
-    const timestamp = this.payload.submitted_at || new Date().toISOString();
+    // タイムスタンプは「回答まとめ」C列の表記仕様に合わせ JST の yyyy/MM/dd HH:mm:ss で固定。
+    // クライアントの submitted_at に依存せず、サーバー時刻で再生成して時計ズレを防ぐ。
+    const timestamp = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
     
     // C〜L: 基本情報
     const nameKanji = this.isJa ? this.ans.name_kanji : this.ans.full_name;
@@ -265,13 +267,9 @@ class Repository {
       masterSheet = this.ss.insertSheet(masterSheetName);
     }
     
-    // A列＝チェックボックス用空欄, B列＝経路と言語, C列以降＝整形済み30列データ
-    const langLabel = (payload.lang === 'ja' ? `NFC(JA:${storeName})` : `NFC(EN:${storeName})`);
-    const finalRow = ['', langLabel, ...masterRow];
-
-    // C列（タイムスタンプ列）の最終入力行 + 1 に書き込む。
-    // appendRow だと A/B列に手動メモが入った下にズレるため、旧 onFormSubmit と同じく
-    // C列基準で「データの最終位置」を見て連続性を保つ。
+    // 書き込み位置：C列（タイムスタンプ列）の最終入力行 + 1
+    // appendRow は A/B 列に手動メモがあると下にズレるため、旧 onFormSubmit と同じく
+    // C 列基準で「データの最終位置」を見て連続性を保つ。
     const cValues = masterSheet.getRange('C:C').getValues();
     let lastRowC = 0;
     for (let i = cValues.length - 1; i >= 0; i--) {
@@ -281,9 +279,12 @@ class Repository {
       }
     }
     const writeRow = lastRowC + 1;
-    masterSheet.getRange(writeRow, 1, 1, finalRow.length).setValues([finalRow]);
 
-    // 挿入した行のA列にチェックボックスを生成する
+    // 列の役割：
+    //   A 列＝チェックボックス（自動挿入）
+    //   B 列＝手動入力の会員番号（絶対に上書きしない）
+    //   C 列以降＝整形済み 30 列データ
+    masterSheet.getRange(writeRow, 3, 1, masterRow.length).setValues([masterRow]);
     masterSheet.getRange(writeRow, 1).insertCheckboxes();
   }
 }
