@@ -106,13 +106,15 @@ function buildSlackMessage(payload, masterRow, isError, errorMessage) {
   const lines = [];
   for (let i = 0; i < masterRow.length; i++) {
     const val = masterRow[i];
-    if (val !== undefined && val !== null && val !== '') {
-      let displayVal = String(val);
-      if (displayVal.startsWith("'")) {
-        displayVal = displayVal.substring(1);
-      }
-      lines.push(`• *${MASTER_HEADERS[i]}*: ${displayVal}`);
+    if (val === undefined || val === null || val === '') continue;
+    // Date 型（タイムスタンプ列など）は Slack 上では時分秒まで含めた可読形式に整形する。
+    let displayVal = (val instanceof Date)
+      ? Utilities.formatDate(val, 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss')
+      : String(val);
+    if (displayVal.startsWith("'")) {
+      displayVal = displayVal.substring(1);
     }
+    lines.push(`• *${MASTER_HEADERS[i]}*: ${displayVal}`);
   }
 
   return headerText + lines.join('\n');
@@ -171,9 +173,11 @@ class DataTransformer {
    * 副作用やアレルギーの「はい/いいえ」と「詳細」を別のセルに分ける。
    */
   buildMasterRow() {
-    // タイムスタンプは「回答まとめ」C列の表記仕様に合わせ JST の yyyy/MM/dd HH:mm:ss で固定。
-    // クライアントの submitted_at に依存せず、サーバー時刻で再生成して時計ズレを防ぐ。
-    const timestamp = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
+    // タイムスタンプは Date オブジェクトのまま保持し、スプレッドシート側で書式を当てる。
+    // こうするとセルの値には日時情報（年月日時分秒）が保たれたまま、表示書式 yyyy/MM/dd で
+    // 一覧上は日付のみ、編集モード（セルクリック）で時分秒まで見える挙動になる。
+    // クライアントの submitted_at には依存せず、サーバー時刻で再生成して時計ズレも防ぐ。
+    const timestamp = new Date();
     
     // C〜L: 基本情報
     const nameKanji = this.isJa ? this.ans.name_kanji : this.ans.full_name;
@@ -272,6 +276,8 @@ class Repository {
     }
     const langDisplay = (payload.lang === 'ja' ? '日本語' : '英語');
     nfcSheet.appendRow([storeName, langDisplay, ...masterRow]);
+    // 送信日時セル（C 列）は表示書式 yyyy/MM/dd・編集時に時分秒まで見える形式に統一
+    nfcSheet.getRange(nfcSheet.getLastRow(), 3).setNumberFormat('yyyy/MM/dd');
 
     // 2. 「回答まとめ」シートへの統合書き込み
     const masterSheetName = '回答まとめ';
@@ -298,6 +304,8 @@ class Repository {
     //   B 列＝手動入力の会員番号（絶対に上書きしない）
     //   C 列以降＝整形済み 30 列データ
     masterSheet.getRange(writeRow, 3, 1, masterRow.length).setValues([masterRow]);
+    // 送信日時セル（C 列）は表示書式 yyyy/MM/dd・編集時に時分秒まで見える形式に統一
+    masterSheet.getRange(writeRow, 3).setNumberFormat('yyyy/MM/dd');
     masterSheet.getRange(writeRow, 1).insertCheckboxes();
   }
 }
