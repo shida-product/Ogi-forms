@@ -268,11 +268,22 @@ class Repository {
     // A列＝チェックボックス用空欄, B列＝経路と言語, C列以降＝整形済み30列データ
     const langLabel = (payload.lang === 'ja' ? `NFC(JA:${storeName})` : `NFC(EN:${storeName})`);
     const finalRow = ['', langLabel, ...masterRow];
-    
-    masterSheet.appendRow(finalRow);
-    
+
+    // C列（タイムスタンプ列）の最終入力行 + 1 に書き込む。
+    // appendRow だと A/B列に手動メモが入った下にズレるため、旧 onFormSubmit と同じく
+    // C列基準で「データの最終位置」を見て連続性を保つ。
+    const cValues = masterSheet.getRange('C:C').getValues();
+    let lastRowC = 0;
+    for (let i = cValues.length - 1; i >= 0; i--) {
+      if (cValues[i][0] !== '' && cValues[i][0] !== null) {
+        lastRowC = i + 1;
+        break;
+      }
+    }
+    const writeRow = lastRowC + 1;
+    masterSheet.getRange(writeRow, 1, 1, finalRow.length).setValues([finalRow]);
+
     // 挿入した行のA列にチェックボックスを生成する
-    const lastRow = masterSheet.getLastRow();
-    masterSheet.getRange(lastRow, 1).insertCheckboxes();
+    masterSheet.getRange(writeRow, 1).insertCheckboxes();
   }
 }
