@@ -251,10 +251,10 @@ class Repository {
     const storeName = typeof storeObj === 'string' ? storeObj : '不明';
 
     // 1. 「回答（NFC）」シートへの書き込み
-    //    列構成： A=店舗 / B=言語 / C〜AF=整形 30 列（MASTER_HEADERS と一致）/ AG=生 JSON
-    //    末尾に生 JSON を残すことで「整形済みで見やすく、生データも復旧用に確保」を両立する。
+    //    列構成： A=店舗 / B=言語 / C〜AF=整形 30 列（MASTER_HEADERS と一致）
+    //    生データ復旧網は Slack エラー緊急通知で確保しているため、シートには重複保持しない。
     const nfcSheetName = '回答（NFC）';
-    const NFC_HEADERS = ['店舗', '言語', ...MASTER_HEADERS, '生データ (JSON)'];
+    const NFC_HEADERS = ['店舗', '言語', ...MASTER_HEADERS];
     let nfcSheet = this.ss.getSheetByName(nfcSheetName);
     if (!nfcSheet) {
       nfcSheet = this.ss.insertSheet(nfcSheetName);
@@ -263,7 +263,7 @@ class Repository {
       nfcSheet.setFrozenRows(1);
     }
     const langDisplay = (payload.lang === 'ja' ? '日本語' : '英語');
-    nfcSheet.appendRow([storeName, langDisplay, ...masterRow, JSON.stringify(payload.answers || {})]);
+    nfcSheet.appendRow([storeName, langDisplay, ...masterRow]);
 
     // 2. 「回答まとめ」シートへの統合書き込み
     const masterSheetName = '回答まとめ';
