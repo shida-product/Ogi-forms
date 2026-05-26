@@ -5,7 +5,7 @@
 
 export const CONFIG = {
   // セキュリティトークン
-  apiToken: 'oogi-form-secure-token-2026',
+  apiToken: 'ogi-forms-prod-dfbd023c40ce3bcc',
 
   // Google Apps Script (GAS) Web API URL
   // ※現在の本番環境URL

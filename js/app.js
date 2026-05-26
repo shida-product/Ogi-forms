@@ -24,7 +24,7 @@ const state = {
 };
 
 // ── ローカルストレージ一時保存・復元 ──
-const STORAGE_KEY = 'oogi_form_answers';
+const STORAGE_KEY = 'ogi_forms_answers';
 
 function saveAnswers() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.answers));

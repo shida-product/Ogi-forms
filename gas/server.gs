@@ -4,7 +4,7 @@
  */
 
 // セキュリティトークン
-const API_TOKEN = 'oogi-form-secure-token-2026';
+const API_TOKEN = 'ogi-forms-prod-dfbd023c40ce3bcc';
 
 // 1. Controller 層: エントリーポイント
 function doPost(e) {
