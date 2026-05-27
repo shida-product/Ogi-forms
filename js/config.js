@@ -17,9 +17,28 @@ export const CONFIG = {
     tagline: '入会申込',
   },
 
-  // 店舗設定
+  // 店舗設定（line は店舗ごとに公式アカウントが違うため stores 配下で持つ）
   stores: {
-    shibuya: { name: '渋谷店', label: 'オオギ薬局 渋谷店' },
+    shibuya: {
+      name: '渋谷店',
+      label: 'オオギ薬局 渋谷店',
+      line: {
+        title: 'オオギ薬局「渋谷店」 公式LINE',
+        description: 'お薬のご相談や次回予約など、LINEでやりとりできます。ぜひ友だち追加をお願いします。',
+        button: '友だち追加する',
+        url: 'https://lin.ee/WGb4cXx',
+      },
+    },
+    ebisu: {
+      name: '恵比寿店',
+      label: 'オオギ薬局 恵比寿店',
+      line: {
+        title: 'オオギ薬局「恵比寿店」 公式LINE',
+        description: 'お薬のご相談や次回予約など、LINEでやりとりできます。ぜひ友だち追加をお願いします。',
+        button: '友だち追加する',
+        url: 'https://lin.ee/pRLA2xC',
+      },
+    },
   },
   defaultStore: 'shibuya',
 
@@ -396,12 +415,6 @@ export const CONFIG = {
       time: '所要時間：約3分',
       privacyNote: '※ご入力いただいた個人情報は、当店のプライバシーポリシーに基づき厳重に管理し、ご本人の同意なく第三者に開示・提供することはありません。',
     },
-    // LINE案内
-    line: {
-      title: 'オオギ薬局「渋谷店」 公式LINE',
-      description: 'お薬のご相談や次回予約など、LINEでやりとりできます。ぜひ友だち追加をお願いします。',
-      button: '友だち追加する',
-      url: 'https://lin.ee/WGb4cXx',
-    },
+    // LINE 案内は店舗ごとに違うため CONFIG.stores[code].line を参照する（i18n.line は廃止）
   },
 };

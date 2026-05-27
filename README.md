@@ -23,8 +23,8 @@
 |---|---|---|
 | 渋谷店 | 日本語 | `https://ogi-forms.pages.dev/shibuya` |
 | 渋谷店 | English | `https://ogi-forms.pages.dev/shibuya/en` |
-| 恵比寿店 | 日本語 | `https://ogi-forms.pages.dev/ebisu`（**後日実装**） |
-| 恵比寿店 | English | `https://ogi-forms.pages.dev/ebisu/en`（**後日実装**） |
+| 恵比寿店 | 日本語 | `https://ogi-forms.pages.dev/ebisu` |
+| 恵比寿店 | English | `https://ogi-forms.pages.dev/ebisu/en` |
 
 ルーティングは `_redirects` で実現。内部的には `index.html?store=<店舗>` / `index_en.html?store=<店舗>` にリライトされる。
 

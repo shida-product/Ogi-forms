@@ -16,47 +16,73 @@ const MASTER_HEADERS = [
   '国籍(EN)', '滞在ステータス(EN)', '言語'
 ];
 
+// 店舗ごとの転記先スプレッドシート ID & Slack Webhook URL を Script Properties から取得するためのキー定義。
+// 値はコードに直接埋めず Script Properties で管理する（漏洩・店舗増設時の運用負担を下げるため）。
+const STORE_CONFIG = {
+  shibuya: {
+    sheetIdKey: 'SHEET_ID_SHIBUYA',
+    webhookKey: 'SLACK_WEBHOOK_URL_SHIBUYA',
+    name: '渋谷店',
+  },
+  ebisu: {
+    sheetIdKey: 'SHEET_ID_EBISU',
+    webhookKey: 'SLACK_WEBHOOK_URL_EBISU',
+    name: '恵比寿店',
+  },
+};
+// 未知 store / JSON パース失敗時のフォールバック先
+const DEFAULT_STORE = 'shibuya';
+
+function getStoreConfig(storeCode) {
+  return STORE_CONFIG[storeCode] || STORE_CONFIG[DEFAULT_STORE];
+}
+
 // 1. Controller 層: エントリーポイント
 function doPost(e) {
   const lock = LockService.getScriptLock();
   let payload = null;
+  // payload が解析できる前にエラーが起きても通知できるよう、フォールバック店舗を先に決めておく
+  let storeCfg = STORE_CONFIG[DEFAULT_STORE];
   try {
     lock.waitLock(30000);
     payload = JSON.parse(e.postData.contents);
-    
+
     // トークン検証
     if (!payload || payload.token !== API_TOKEN) {
-      return ContentService.createTextOutput(JSON.stringify({ 
-        status: 'error', 
-        message: 'Forbidden: Invalid API Token' 
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'Forbidden: Invalid API Token'
       })).setMimeType(ContentService.MimeType.JSON);
     }
-    
-    const processor = new FormProcessor(payload);
+
+    // 店舗コードから書き込み先・通知先を決定
+    storeCfg = getStoreConfig(payload.store);
+
+    const processor = new FormProcessor(payload, storeCfg);
     processor.execute();
-    
+
     // 正常時のSlack通知送信
     const masterRow = processor.transformer.buildMasterRow();
     const slackMessage = buildSlackMessage(payload, masterRow, false);
-    sendToSlack(slackMessage);
-    
+    sendToSlack(slackMessage, storeCfg.webhookKey);
+
     return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     const errorStr = error.toString();
-    
+
     // 【エラー緊急対処】データ保存失敗時、入力データをSlackに緊急エスケープ通知
     if (payload) {
       try {
         const transformer = new DataTransformer(payload);
         const masterRow = transformer.buildMasterRow();
         const emergencyMessage = buildSlackMessage(payload, masterRow, true, errorStr);
-        sendToSlack(emergencyMessage);
+        sendToSlack(emergencyMessage, storeCfg.webhookKey);
       } catch (innerError) {
-        sendToSlack(`⚠️ *【緊急・システムエラー】入会フォームの処理中に深刻なエラーが発生しました。*\nエラー: \`${errorStr}\`\n生データ: \`${e.postData.contents}\``);
+        sendToSlack(`⚠️ *【緊急・システムエラー】入会フォームの処理中に深刻なエラーが発生しました。*\nエラー: \`${errorStr}\`\n生データ: \`${e.postData.contents}\``, storeCfg.webhookKey);
       }
     } else {
-      sendToSlack(`⚠️ *【緊急・システムエラー】JSONパース前のフェーズでエラーが発生しました。*\nエラー: \`${errorStr}\``);
+      sendToSlack(`⚠️ *【緊急・システムエラー】JSONパース前のフェーズでエラーが発生しました。*\nエラー: \`${errorStr}\``, storeCfg.webhookKey);
     }
 
     return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: errorStr }))
@@ -70,11 +96,16 @@ function doPost(e) {
  * Slackへメッセージを送信する共通関数
  * muteHttpExceptions: true で 4xx/5xx もレスポンス取得し、ステータス・本文を必ずログ出力。
  * GAS の「実行数」→ 該当実行 → 「ログ」で原因切り分けできる設計。
+ *
+ * @param {string} message  送信メッセージ
+ * @param {string} webhookKey  Script Properties のキー名（例: 'SLACK_WEBHOOK_URL_SHIBUYA'）
+ *                             未指定時はデフォルト店舗のキーを使用
  */
-function sendToSlack(message) {
-  const webhookUrl = PropertiesService.getScriptProperties().getProperty('SLACK_WEBHOOK_URL');
+function sendToSlack(message, webhookKey) {
+  const key = webhookKey || STORE_CONFIG[DEFAULT_STORE].webhookKey;
+  const webhookUrl = PropertiesService.getScriptProperties().getProperty(key);
   if (!webhookUrl) {
-    Logger.log('[Slack] SLACK_WEBHOOK_URL が Script Properties に未設定');
+    Logger.log('[Slack] ' + key + ' が Script Properties に未設定');
     return;
   }
   // GAS エディタから関数ドロップダウン経由で sendToSlack を直接実行すると message が undefined になる
@@ -87,7 +118,7 @@ function sendToSlack(message) {
   const masked = webhookUrl.length > 36
     ? webhookUrl.substring(0, 30) + '...' + webhookUrl.substring(webhookUrl.length - 6)
     : '(短すぎる値)';
-  Logger.log('[Slack] webhook = ' + masked);
+  Logger.log('[Slack] key=' + key + ' webhook=' + masked);
   Logger.log('[Slack] payload length = ' + message.length);
 
   try {
@@ -110,12 +141,15 @@ function sendToSlack(message) {
 
 /**
  * GAS エディタからの動作確認用エントリポイント。
- * 関数ドロップダウンで `testSlack` を選び ▶ 実行することで、引数を渡した状態で sendToSlack を呼べる。
- * ステータスコード・本文をログで確認できる。
+ * 関数ドロップダウンで `testSlack` を選び ▶ 実行することで、店舗ごとの Slack 通知を確認できる。
+ * 全店舗の Webhook を一度に叩くため、各チャンネルに 🧪 メッセージが届けば正常。
  */
 function testSlack() {
   const now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
-  sendToSlack('🧪 testSlack() 動作確認: ' + now);
+  Object.keys(STORE_CONFIG).forEach(function (code) {
+    const cfg = STORE_CONFIG[code];
+    sendToSlack('🧪 testSlack(' + cfg.name + ') 動作確認: ' + now, cfg.webhookKey);
+  });
 }
 
 /**
@@ -123,7 +157,7 @@ function testSlack() {
  */
 function buildSlackMessage(payload, masterRow, isError, errorMessage) {
   const storeCode = payload.store || 'unknown';
-  const storeName = storeCode === 'shibuya' ? '渋谷店' : storeCode;
+  const storeName = STORE_CONFIG[storeCode] ? STORE_CONFIG[storeCode].name : storeCode;
   const lang = payload.lang === 'ja' ? '日本語' : '英語';
   
   let headerText = '';
@@ -154,16 +188,16 @@ function buildSlackMessage(payload, masterRow, isError, errorMessage) {
 
 // フォーム処理のオーケストレーター
 class FormProcessor {
-  constructor(payload) {
+  constructor(payload, storeCfg) {
     this.payload = payload;
     this.transformer = new DataTransformer(payload);
-    this.repository = new Repository();
+    this.repository = new Repository(storeCfg);
   }
 
   execute() {
     // 1. データの整形 (既存のGoogleフォームまとめ構造に完全一致させる)
     const masterRow = this.transformer.buildMasterRow();
-    
+
     // 2. データベース（スプレッドシート）への書き込み
     this.repository.writeAll(this.payload, masterRow);
   }
@@ -285,14 +319,20 @@ class DataTransformer {
 
 // 3. Repository 層: スプレッドシート操作
 class Repository {
-  constructor() {
-    this.ss = SpreadsheetApp.getActiveSpreadsheet();
+  constructor(storeCfg) {
+    // Script Properties で店舗ごとのスプレッドシート ID を解決し、openById で明示的に開く。
+    // getActiveSpreadsheet は GAS プロジェクト紐付け先に依存して脆いため使わない。
+    const sheetId = PropertiesService.getScriptProperties().getProperty(storeCfg.sheetIdKey);
+    if (!sheetId) {
+      throw new Error('Script Properties に ' + storeCfg.sheetIdKey + ' が未設定です。');
+    }
+    this.ss = SpreadsheetApp.openById(sheetId);
+    this.storeName = storeCfg.name;
   }
 
   writeAll(payload, masterRow) {
     const timestamp = masterRow[0]; // 送信日時
-    const storeObj = payload.store || 'unknown';
-    const storeName = typeof storeObj === 'string' ? storeObj : '不明';
+    const storeName = this.storeName;
 
     // 1. 「回答（NFC）」シートへの書き込み
     //    列構成： A=店舗 / B=言語 / C〜AF=整形 30 列（MASTER_HEADERS と一致）

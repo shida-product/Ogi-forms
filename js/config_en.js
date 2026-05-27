@@ -19,6 +19,7 @@ export const CONFIG = {
   // Stores
   stores: {
     shibuya: { name: 'Shibuya', label: 'Ogi Pharmacy Shibuya' },
+    ebisu: { name: 'Ebisu', label: 'Ogi Pharmacy Ebisu' },
   },
   defaultStore: 'shibuya',
 

@@ -1019,11 +1019,13 @@ function showSuccess() {
 
   if (titleEl) titleEl.textContent = T.messages.success_title;
   if (msgEl) msgEl.innerHTML = T.messages.success_body.replace(/\n/g, '<br>');
-  if (T.line) {
-    if (lineTitleEl) lineTitleEl.textContent = T.line.title;
-    if (lineDescEl) lineDescEl.textContent = T.line.description;
-    if (lineBtnEl) lineBtnEl.href = T.line.url;
-    if (lineBtnText) lineBtnText.textContent = T.line.button;
+  // LINE 案内は店舗ごとに異なるため CONFIG.stores[state.store].line を参照する
+  const storeLine = CONFIG.stores[state.store]?.line;
+  if (storeLine) {
+    if (lineTitleEl) lineTitleEl.textContent = storeLine.title;
+    if (lineDescEl) lineDescEl.textContent = storeLine.description;
+    if (lineBtnEl) lineBtnEl.href = storeLine.url;
+    if (lineBtnText) lineBtnText.textContent = storeLine.button;
   } else {
     const lineSection = document.getElementById('line-section');
     if (lineSection) lineSection.style.display = 'none';

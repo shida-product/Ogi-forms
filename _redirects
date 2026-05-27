@@ -5,6 +5,6 @@
 /shibuya       /index.html?store=shibuya       200
 /shibuya/en    /index_en.html?store=shibuya    200
 
-# 恵比寿店（後日実装：有効化する際は下記コメントを解除）
-# /ebisu       /index.html?store=ebisu         200
-# /ebisu/en    /index_en.html?store=ebisu      200
+# 恵比寿店
+/ebisu         /index.html?store=ebisu         200
+/ebisu/en      /index_en.html?store=ebisu      200
