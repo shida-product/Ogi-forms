@@ -10,7 +10,7 @@ const isEN = document.documentElement.lang === 'en';
 const CONFIG = isEN ? CONFIG_EN : CONFIG_JA;
 
 // ── 開発・テストモード ──
-const DEV_MODE = false;  // false: バリデーション有効 (本番と同じ挙動)
+const DEV_MODE = false;  // false: バリデーション有効 (本番と同じ挙動) | true: 必須項目スキップ可（デザイン確認用）
 const MOCK_SUBMIT = false; // false: 本番のGASへ実際にデータを送信する
 
 // ── テキスト辞書のショートカット ──
@@ -138,7 +138,7 @@ function initStepper() {
     container.innerHTML = `
       <div class="flex items-center gap-4">
         <div class="flex-1 h-[3px] bg-sumi/10 rounded-full overflow-hidden">
-          <div id="progress-bar-fill" class="h-full bg-primary transition-all duration-500 ease-out w-0"></div>
+          <div id="progress-bar-fill" class="h-full bg-accent transition-all duration-500 ease-out w-0"></div>
         </div>
         <span id="progress-text" class="text-[11px] font-bold text-sumi/50 tracking-widest text-right whitespace-nowrap min-w-[2rem]"></span>
       </div>
@@ -355,11 +355,16 @@ function createTextarea(field) {
 
 function createRadioGroup(field) {
   const group = document.createElement('div');
-  group.className = field.vertical ? 'flex flex-col gap-3' : 'flex gap-3 flex-wrap';
+  const isBinary = !field.vertical && field.options.length === 2;
+  group.className = field.vertical
+    ? 'flex flex-col gap-3'
+    : (isBinary ? 'grid grid-cols-2 w-full' : 'flex gap-3 flex-wrap');
 
   field.options.forEach(optionKey => {
     const label = document.createElement('label');
-    label.className = 'pill-radio flex-1';
+    label.className = isBinary
+      ? 'pill-radio w-3/4 justify-self-center'
+      : 'pill-radio flex-1';
 
     const input = document.createElement('input');
     input.type = 'radio';
@@ -654,11 +659,11 @@ function createPostalCodeInput(field) {
   return group;
 }
 
-/** 情報表示専用コンポーネント (info) */
+/** 情報表示専用コンポーネント (info) — 画像内デザインを優先するため外殻装飾なし */
 function createInfoBlock(field) {
   const container = document.createElement('div');
-  container.className = 'info-block bg-white p-5 rounded-xl border border-sumi/10 shadow-sm mt-2';
-  
+  container.className = 'info-block mt-2';
+
   const infoData = T.info[field.id];
   if (!infoData) return container;
 
@@ -671,11 +676,11 @@ function createInfoBlock(field) {
 
   if (infoData.image) {
     const imgWrapper = document.createElement('div');
-    imgWrapper.className = 'w-full flex justify-center mt-2';
+    imgWrapper.className = 'w-full flex justify-center';
     const img = document.createElement('img');
     img.src = infoData.image;
     img.alt = infoData.alt || '';
-    img.className = 'max-w-full h-auto rounded-lg shadow-sm border border-sumi/5';
+    img.className = 'max-w-full h-auto';
     imgWrapper.appendChild(img);
     container.appendChild(imgWrapper);
   }
@@ -797,6 +802,7 @@ function updateNavButtons() {
   const prevBtn = document.getElementById('prev-btn');
   const nextText = document.getElementById('next-text');
   const nextArrow = document.getElementById('next-arrow');
+  const nextCheck = document.getElementById('next-check');
 
   const sections = getVisibleSections();
   const isLastStep = state.currentStep === sections[sections.length - 1];
@@ -806,12 +812,15 @@ function updateNavButtons() {
   if (state.currentStep === -1) {
     if (nextText) nextText.textContent = T.buttons.start;
     if (nextArrow) nextArrow.classList.remove('hidden');
+    if (nextCheck) nextCheck.classList.add('hidden');
   } else if (isLastStep) {
     if (nextText) nextText.textContent = T.buttons.submit;
     if (nextArrow) nextArrow.classList.add('hidden');
+    if (nextCheck) nextCheck.classList.remove('hidden');
   } else {
     if (nextText) nextText.textContent = T.buttons.next;
     if (nextArrow) nextArrow.classList.remove('hidden');
+    if (nextCheck) nextCheck.classList.add('hidden');
   }
 }
 
@@ -1062,7 +1071,7 @@ function renderIntroPage() {
   // 登録内容
   if (intro.content) {
     const contentDiv = document.createElement('div');
-    contentDiv.className = 'bg-primary-light/50 border border-primary/20 rounded-xl p-5';
+    contentDiv.className = 'bg-white border border-sumi/10 shadow-sm rounded-xl p-5';
     const contentP = document.createElement('p');
     contentP.className = 'text-sm sm:text-base text-sumi/80 leading-relaxed whitespace-pre-line';
     contentP.textContent = intro.content;
@@ -1073,7 +1082,7 @@ function renderIntroPage() {
   // 所要時間
   const timeDiv = document.createElement('div');
   timeDiv.className = 'flex items-center justify-center gap-2 text-sm sm:text-base font-medium text-sumi/80 bg-white border border-sumi/10 shadow-sm rounded-xl px-5 py-3 mx-auto w-fit mt-6';
-  timeDiv.innerHTML = `<svg class="w-5 h-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${intro.time}</span>`;
+  timeDiv.innerHTML = `<svg class="w-5 h-5 text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${intro.time}</span>`;
   container.appendChild(timeDiv);
 
   // プライバシー注釈

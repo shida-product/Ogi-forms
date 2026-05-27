@@ -6,7 +6,7 @@
     <title>会員登録 | オオギ薬局</title>
     <meta name="description" content="オオギ薬局の会員登録フォームです。">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/png" href="image/oogi_logo.png">
+    <link rel="icon" type="image/png" href="image/ogi_logo.png">
     <!-- Google Fonts 廃止 (OSネイティブシステムフォントによる超高速・ネイティブアプリライクな表示) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -18,11 +18,14 @@
                     },
                     colors: {
                         sumi: '#2C2C2C',
-                        primary: '#5DA98F',
-                        'primary-dark': '#3D7E6B',
-                        'primary-light': '#9CD4A3',
-                        surface: '#F8FAFC',
-                        'surface-dark': '#F1F5F9',
+                        primary: '#B0DAB8',
+                        'primary-dark': '#9DCEA8',
+                        'primary-light': '#C6E5CC',
+                        accent: '#5DA98F',
+                        'accent-dark': '#3D7E6B',
+                        'accent-light': '#9CD4A3',
+                        surface: '#F1F8F4',
+                        'surface-dark': '#E8F1EB',
                     }
                 }
             }
@@ -36,7 +39,7 @@
         <div class="max-w-lg mx-auto px-4 py-3">
             <!-- 店舗名 -->
             <div class="flex items-center justify-center gap-2">
-                <img src="image/oogi_logo.png" alt="オオギ薬局" class="w-12 h-12 object-contain">
+                <img src="image/ogi_logo.png" alt="オオギ薬局" class="w-12 h-12 object-contain">
                 <h1 id="store-title" class="text-base font-bold text-sumi/80 tracking-wider">オオギ薬局</h1>
             </div>
         </div>
@@ -59,16 +62,19 @@
         <div id="stepper-container" class="mt-8 mb-4 mx-auto w-full max-w-[320px] px-2" style="display: none;"></div>
 
         <!-- ナビゲーションボタン -->
-        <div class="mt-8 flex gap-3 w-[70%] min-w-[280px] mx-auto" id="nav-buttons">
+        <div class="mt-8 flex gap-3 w-1/2 min-w-[280px] mx-auto" id="nav-buttons">
             <button type="button" id="prev-btn" class="hidden flex-none px-5 py-3.5 rounded-xl border border-sumi/10 text-sumi/60 hover:text-sumi hover:border-sumi/20 transition-all text-sm font-medium">
                 <span id="prev-text">戻る</span>
             </button>
-            <button type="button" id="next-btn" class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3.5 px-6 rounded-xl shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center text-base tracking-wider">
+            <button type="button" id="next-btn" class="flex-1 bg-primary hover:bg-primary-dark text-sumi font-medium py-3.5 px-6 rounded-xl shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center text-base tracking-wider whitespace-nowrap">
                 <span id="next-text">次へ</span>
                 <svg id="next-arrow" class="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                 </svg>
-                <svg id="submit-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg id="next-check" class="ml-2 w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg id="submit-spinner" class="animate-spin ml-2 h-5 w-5 text-sumi hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -85,14 +91,14 @@
         <div class="relative z-10 w-full max-w-md px-6 text-center">
             <!-- チェックアイコン -->
             <div class="success-icon-bg w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_8px_30px_rgba(93,169,143,0.15)] opacity-0">
-                <svg class="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-12 h-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path class="success-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
 
             <div class="fade-up" style="animation-delay: 0.5s;">
                 <h2 id="success-title" class="text-2xl sm:text-3xl font-bold tracking-wider text-sumi mb-4"></h2>
-                <div class="w-12 h-[2px] bg-primary mx-auto mb-6 rounded-full"></div>
+                <div class="w-12 h-[2px] bg-accent mx-auto mb-6 rounded-full"></div>
                 <p id="success-message" class="text-sumi/70 leading-relaxed text-base mb-8"></p>
                 
                 <!-- LINE友だち登録 -->

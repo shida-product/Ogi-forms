@@ -100,14 +100,14 @@ export const CONFIG = {
       type: 'radio',
       required: true,
       section: 2,
-      options: ['yes', 'no', 'not_sure'],
+      options: ['yes', 'no'],
     },
     {
       id: 'allergy_detail',
       type: 'textarea',
       required: true,
       section: 2,
-      condition: (answers) => answers.allergy === 'yes' || answers.allergy === 'not_sure',
+      condition: (answers) => answers.allergy === 'yes',
     },
     {
       id: 'current_medicine',
@@ -204,10 +204,10 @@ export const CONFIG = {
       4: 'Finish',
     },
     descriptions: {
-      1: 'Please provide your basic information.',
-      2: 'Please answer questions about your current health status.',
-      3: '(For female patients only)',
-      4: 'Just a quick survey, and a look at your new membership card.',
+      1: 'Your basic info.',
+      2: 'Your current health status.',
+      3: '(Female patients only)',
+      4: 'Quick survey and your membership card.',
     },
     
     // Labels
@@ -215,35 +215,34 @@ export const CONFIG = {
       full_name: 'Full Name',
       birth_date: 'Date of Birth',
       sex: 'Gender',
-      email: 'E-mail Address',
+      email: 'Email',
       nationality: 'Nationality',
-      residence_status: 'Residence Status in Japan',
-      address_hotel: 'Accommodation Address (Hotel Name or Address)',
+      residence_status: 'Residence Status',
+      address_hotel: 'Accommodation',
       postal_code: 'Postal / Zip Code',
       address: 'Prefecture / City',
       address_detail: 'Street / Building / Room',
-      
-      allergy: 'Do you have any allergies?',
+
+      allergy: 'Any allergies?',
       allergy_detail: 'Please specify',
-      current_medicine: 'Are you currently taking any medications or supplements?',
+      current_medicine: 'Currently taking any medications?',
       current_medicine_detail: 'Please list them',
-      current_disease: 'Are you currently receiving treatment for any medical conditions?',
+      current_disease: 'Under treatment for any conditions?',
       current_disease_detail: 'Please specify',
-      
-      pregnant: 'Are you pregnant or possibly pregnant?',
+
+      pregnant: 'Pregnant or possibly pregnant?',
       pregnant_detail: 'How many weeks?',
-      breastfeeding: 'Are you currently breastfeeding?',
-      breastfeeding_detail: 'How old is your baby (in months)?',
-      
+      breastfeeding: 'Currently breastfeeding?',
+      breastfeeding_detail: 'Baby\'s age (months)',
+
       referral_source: 'How did you hear about us?',
-      membership_info: '',
+      membership_info: 'About Your Membership Card',
     },
 
     // Options
     options: {
       yes: 'Yes',
       no: 'No',
-      not_sure: 'Not sure',
       male: 'Male',
       female: 'Female',
       
@@ -265,7 +264,7 @@ export const CONFIG = {
       full_name: 'e.g. John Doe',
       email: 'e.g. example@email.com',
       nationality: 'e.g. USA',
-      address_hotel: 'Please paste your hotel address here.\ne.g. 1-2-3 Ebisu, Shibuya-ku, Tokyo\nABC Hotel Room 101',
+      address_hotel: 'e.g. ABC Hotel, 1-2-3 Ebisu, Shibuya-ku, Tokyo',
       postal_code: 'e.g. 1500041',
       address: 'Autofills from Zip Code',
       address_detail: 'e.g. 1-2-3 Ebisu, ABC Condominium #101',
@@ -278,9 +277,10 @@ export const CONFIG = {
 
     // Helpers
     helpers: {
-      full_name: 'Please enter your full name as it appears on your passport (A–Z only).',
-      address_hotel: '※ Just the hotel name is OK! (Or you can paste the full address from Google Maps)',
-      postal_code: 'Entering your 7-digit Zip Code will automatically fill in your Prefecture and City (in Japanese).',
+      full_name: 'As shown on your passport (A–Z only).',
+      address_hotel: 'Hotel name only is fine. Google Maps address also works.',
+      postal_code: '7 digits auto-fills Prefecture & City (in Japanese).',
+      membership_info: 'Please show this card when you visit.',
     },
 
     // Date Select Labels
@@ -301,7 +301,7 @@ export const CONFIG = {
     buttons: {
       next: 'Next',
       prev: 'Back',
-      submit: 'Complete Registration',
+      submit: 'Complete',
       submitting: 'Processing...',
       start: 'Start Registration',
     },
@@ -309,14 +309,14 @@ export const CONFIG = {
     // Messages
     messages: {
       success_title: 'Registration Complete',
-      success_body: 'Thank you for filling out the form.\nYou may safely close this window.\nIf you have any questions, feel free to ask our staff.',
-      error_general: 'An error occurred during submission. Please try again.',
+      success_body: 'Thank you. You may close this window.\nFeel free to ask our staff if you have questions.',
+      error_general: 'Submission failed. Please try again.',
       required: 'Required',
       invalid_kana: 'Invalid format',
       invalid_phone: 'Invalid phone number',
       invalid_postal: '7 digits required',
-      invalid_email: 'Invalid email address',
-      privacy_required: 'You must agree to the privacy policy.',
+      invalid_email: 'Invalid email',
+      privacy_required: 'Please agree to the privacy policy.',
       other_placeholder: 'Please specify',
       optional: '- Optional',
     },
@@ -324,19 +324,18 @@ export const CONFIG = {
     // Intro
     intro: {
       greeting: 'Welcome to Ogi Pharmacy',
-      main: 'We ask all first-time visitors to complete this registration form.',
+      main: 'First-time visitors, please fill out this form.',
       content: '[ Information Needed ]\n- Personal & Contact Info\n- Current Address in Japan\n- Allergies & Health Status\n- Current Medications',
-      time: 'Estimated time: 3 mins',
-      privacyNote: '* Your personal information will be strictly managed in accordance with our privacy policy and will never be disclosed or shared with third parties without your consent.',
+      time: 'About 3 mins',
+      privacyNote: '* Your data is handled per our privacy policy and never shared without consent.',
     },
 
     // Info components special content
-    // 会員カード説明は画像（image/membership_card.png）内に全テキストを焼き込んでいるため、
-    // 画面表示用の text / label は空にして画像のみを表示する。
+    // タイトル文言は labels / helpers から表示し、画像はタイトル領域をクロップした body のみ使用。
     info: {
       membership_info: {
         text: '',
-        image: 'image/membership_card.png',
+        image: 'image/membership_card_body.png',
         alt: 'Membership Card'
       }
     }

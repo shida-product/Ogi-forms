@@ -1,4 +1,10 @@
 /* ── オオギ薬局 入会フォーム — カスタムスタイル ── */
+/* カラーシステム：
+   Primary #C6E5CC（CTA：次へボタン・ピル選択・チェックボックス背景）
+   Accent  #5DA98F（進捗・世界観・成功・タイマーアイコン）
+   Ink     #2C2C2C（テキスト全般・中性グレーは alpha で表現）
+   Surface #F1F8F4（背景）
+   青はロゴ画像内のみで表現。色数は実質 3 トーン（パステル緑＋濃緑＋墨＋極薄ミント背景） */
 
 /* ── アニメーション ── */
 @keyframes fadeInUp {
@@ -42,24 +48,24 @@
   animation: lineDraw 0.6s ease-out 0.3s forwards;
 }
 
-/* ── ステッパー ── */
+/* ── ステッパー（Accent 緑） ── */
 .stepper-dot {
   width: 10px; height: 10px; border-radius: 50%;
-  border: 2px solid #CBD5E1; background: #F1F5F9;
+  border: 2px solid rgba(44, 44, 44, 0.2); background: #E8F1EB;
   transition: all 0.3s ease; flex-shrink: 0; position: relative; z-index: 2;
 }
 .stepper-dot.active {
   border-color: #5DA98F; background: #5DA98F;
-  box-shadow: 0 0 0 4px rgba(93, 169, 143, 0.12);
+  box-shadow: 0 0 0 4px rgba(198, 229, 204, 0.6);
 }
 .stepper-dot.done { border-color: #5DA98F; background: #5DA98F; }
 .stepper-line {
-  flex: 1; height: 2px; background: #CBD5E1;
+  flex: 1; height: 2px; background: rgba(44, 44, 44, 0.15);
   transition: background 0.3s ease;
 }
 .stepper-line.done { background: #5DA98F; }
 .stepper-label {
-  font-size: 10px; color: #94A3B8; white-space: nowrap;
+  font-size: 10px; color: rgba(44, 44, 44, 0.45); white-space: nowrap;
   transition: color 0.3s ease;
   max-width: 64px; text-align: center;
   overflow: hidden; text-overflow: ellipsis;
@@ -69,7 +75,7 @@
 .form-input {
   width: 100%;
   border: none;
-  border-bottom: 1.5px solid #E2E8F0;
+  border-bottom: 1.5px solid rgba(44, 44, 44, 0.12);
   border-radius: 0;
   padding: 0.75rem 0.25rem;
   background: transparent;
@@ -81,50 +87,65 @@
   appearance: none;
   -webkit-appearance: none;
 }
-.form-input:hover { border-bottom-color: #94A3B8; }
+.form-input:hover { border-bottom-color: rgba(44, 44, 44, 0.4); }
 .form-input:focus {
-  border-bottom-color: #2C2C2C; /* Linear Minimal (Pattern B) のフォーカス時はスミ色 */
+  border-bottom-color: #2C2C2C; /* Linear Minimal: フォーカス時はスミ色 */
   background-color: transparent;
   box-shadow: none;
 }
-.form-input::placeholder { color: #CBD5E1; }
+.form-input::placeholder { color: rgba(44, 44, 44, 0.25); }
 
 /* 複数行の記述欄（テキストエリア）は、下線だけだと使いづらいため、極細のリニアボーダーを適用 */
-textarea.form-input { 
-  min-height: 88px; resize: vertical; 
-  border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 0.75rem; 
+textarea.form-input {
+  min-height: 88px; resize: vertical;
+  border: 1px solid rgba(44, 44, 44, 0.12); border-radius: 0.5rem; padding: 0.75rem;
 }
 textarea.form-input:focus {
   border-color: #2C2C2C; border-bottom-color: #2C2C2C;
 }
 select.form-input { cursor: pointer; }
 
-/* ── ラジオ（ピル型） ── */
+/* ── ラジオ（ピル型・Primary パステルミント） ── */
 .pill-radio input[type="radio"] {
   position: absolute; opacity: 0; width: 0; height: 0;
 }
 .pill-label {
   display: block; width: 100%; text-align: center;
   padding: 0.875rem 1rem; /* タップ領域確保 (約48px以上の高さへ) */
-  border: 2px solid #E2E8F0; border-radius: 0.5rem;
+  border: 2px solid rgba(44, 44, 44, 0.12); border-radius: 0.5rem;
   font-size: 1rem; font-weight: 700;
-  color: #64748B; background: #FFFFFF;
+  color: rgba(44, 44, 44, 0.55); background: #FFFFFF;
   cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none;
 }
-.pill-label:active { transform: scale(0.98); } /* モバイル時の微細なタップ感 */
-.pill-label:hover { border-color: #94A3B8; }
+.pill-label:active { transform: scale(0.98); }
+.pill-label:hover { border-color: rgba(44, 44, 44, 0.35); }
 .pill-radio input[type="radio"]:checked + .pill-label {
-  border-color: #5DA98F; color: #FFFFFF;
-  background: #5DA98F;
-  box-shadow: 0 4px 10px -2px rgba(93, 169, 143, 0.3);
+  border-color: #B0DAB8; color: #2C2C2C;
+  background: #B0DAB8;
+  box-shadow: 0 4px 10px -2px rgba(93, 169, 143, 0.2);
 }
 
-/* ── チェックボックス ── */
-/* タップしやすいようコンテナ側のラベルに余白を持たせる想定でサイズ変更 */
+/* ── チェックボックス（Primary パステル + 白チェック・カスタム描画） ── */
+/* ブラウザネイティブを無効化し、SVG をチェック時に背景に重ねて白いチェックを表現 */
 .custom-checkbox {
   width: 1.5rem; height: 1.5rem; /* 24px */
-  accent-color: #5DA98F; cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid rgba(44, 44, 44, 0.2);
+  border-radius: 0.25rem;
+  background: #FFFFFF;
+  cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.custom-checkbox:hover { border-color: rgba(44, 44, 44, 0.4); }
+.custom-checkbox:checked {
+  background-color: #B0DAB8;
+  border-color: #B0DAB8;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 75%;
 }
 
 /* ── フィールドラッパー ── */
@@ -132,13 +153,13 @@ select.form-input { cursor: pointer; }
   transition: opacity 0.3s, transform 0.3s;
 }
 
-/* ── インラインバリデーション アイコン ── */
+/* ── インラインバリデーション アイコン（Accent 緑：成功フィードバック） ── */
 .valid-icon-wrapper {
   position: absolute;
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #22C55E;
+  color: #5DA98F;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
