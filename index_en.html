@@ -48,8 +48,8 @@
     <main class="max-w-lg mx-auto pt-6 pb-16 px-4 sm:px-6">
         <!-- ステップ コンテナ -->
         <div id="step-container" class="min-h-[55vh] flex flex-col">
-            <!-- ヘッダー -->
-            <header class="mb-8">
+            <!-- ヘッダー（タイトル・注釈は中央寄せ） -->
+            <header class="mb-8 text-center">
                 <h2 id="step-title" class="text-xl sm:text-2xl font-bold tracking-wide text-sumi mb-2"></h2>
                 <p id="step-desc" class="text-sm text-sumi/50 leading-relaxed"></p>
             </header>
@@ -86,9 +86,10 @@
         </footer>
     </main>
 
-    <!-- 送信完了画面 -->
-    <div id="success-modal" class="fixed inset-0 z-[100] flex flex-col items-center justify-center hidden bg-surface">
-        <div class="relative z-10 w-full max-w-md px-6 text-center">
+    <!-- 送信完了画面（内容が画面より長い場合はスクロール可能） -->
+    <div id="success-modal" class="fixed inset-0 z-[100] hidden bg-surface overflow-y-auto">
+      <div class="min-h-full flex flex-col items-center justify-center py-10 px-6">
+        <div class="relative z-10 w-full max-w-md text-center">
             <!-- チェックアイコン -->
             <div class="success-icon-bg w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_8px_30px_rgba(93,169,143,0.15)] opacity-0">
                 <svg class="w-12 h-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +103,7 @@
                 <p id="success-message" class="text-sumi/70 leading-relaxed text-base mb-8"></p>
 
                 <!-- 会員カード案内（来店時に提示） -->
-                <div class="mb-4 text-left">
+                <div class="mb-4">
                     <h3 class="text-base font-bold text-sumi mb-1">About Your Membership Card</h3>
                     <p class="text-sm text-sumi/60 mb-3">Please show this card when you visit.</p>
                     <img src="image/membership_card_body.png" alt="Membership Card" class="w-full"/>
@@ -114,6 +115,7 @@
                 <p class="text-xs text-sumi/30 tracking-[0.15em]">Ogi Pharmacy</p>
             </div>
         </div>
+      </div>
     </div>
 
     <script type="module" src="js/app.js"></script>
