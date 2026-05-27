@@ -7,9 +7,8 @@ export const CONFIG = {
   // セキュリティトークン
   apiToken: 'ogi-forms-prod-dfbd023c40ce3bcc',
 
-  // Google Apps Script (GAS) Web API URL
-  // Replace after deployment
-  gasUrl: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+  // Google Apps Script (GAS) Web API URL（日本語版と同じプロジェクトに投げる）
+  gasUrl: 'https://script.google.com/macros/s/AKfycbwOTKmwEitxHSBmev-CnNAzI7r3GRfrqC2luzMSySUJaOOY3SwaTHm7blpH0P_BG8-Y/exec',
 
   // Pharmacy Information
   pharmacy: {
@@ -170,7 +169,7 @@ export const CONFIG = {
       condition: (answers) => answers.sex === 'female' && answers.breastfeeding === 'yes',
     },
 
-    // === Section 4: Survey & Membership ===
+    // === Section 4: Quick Survey ===
     {
       id: 'referral_source',
       type: 'radio',
@@ -179,12 +178,6 @@ export const CONFIG = {
       options: ['map', 'search_medicine', 'referral', 'walked_by', 'other_survey'],
       hasOther: true,
       vertical: true,
-    },
-    {
-      id: 'membership_info',
-      type: 'info',
-      required: false,
-      section: 4,
     },
   ],
 
@@ -195,7 +188,7 @@ export const CONFIG = {
       1: 'Personal Information',
       2: 'Health Status',
       3: 'Women\'s Health',
-      4: 'Survey & Membership',
+      4: 'Quick Survey',
     },
     stepperLabels: {
       1: 'Profile',
@@ -207,7 +200,7 @@ export const CONFIG = {
       1: 'Your basic info.',
       2: 'Your current health status.',
       3: '(Female patients only)',
-      4: 'Quick survey and your membership card.',
+      4: 'Just a quick survey.',
     },
     
     // Labels
@@ -236,7 +229,6 @@ export const CONFIG = {
       breastfeeding_detail: 'Baby\'s age (months)',
 
       referral_source: 'How did you hear about us?',
-      membership_info: 'About Your Membership Card',
     },
 
     // Options
@@ -280,7 +272,6 @@ export const CONFIG = {
       full_name: 'As shown on your passport (A–Z only).',
       address_hotel: 'Hotel name only is fine. Google Maps address also works.',
       postal_code: '7 digits auto-fills Prefecture & City (in Japanese).',
-      membership_info: 'Please show this card when you visit.',
     },
 
     // Date Select Labels
@@ -330,14 +321,5 @@ export const CONFIG = {
       privacyNote: '* Your data is handled per our privacy policy and never shared without consent.',
     },
 
-    // Info components special content
-    // タイトル文言は labels / helpers から表示し、画像はタイトル領域をクロップした body のみ使用。
-    info: {
-      membership_info: {
-        text: '',
-        image: 'image/membership_card_body.png',
-        alt: 'Membership Card'
-      }
-    }
   },
 };

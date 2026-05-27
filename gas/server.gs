@@ -68,22 +68,54 @@ function doPost(e) {
 
 /**
  * Slackへメッセージを送信する共通関数
+ * muteHttpExceptions: true で 4xx/5xx もレスポンス取得し、ステータス・本文を必ずログ出力。
+ * GAS の「実行数」→ 該当実行 → 「ログ」で原因切り分けできる設計。
  */
 function sendToSlack(message) {
   const webhookUrl = PropertiesService.getScriptProperties().getProperty('SLACK_WEBHOOK_URL');
   if (!webhookUrl) {
-    Logger.log('SLACK_WEBHOOK_URL が設定されていません');
+    Logger.log('[Slack] SLACK_WEBHOOK_URL が Script Properties に未設定');
     return;
   }
+  // GAS エディタから関数ドロップダウン経由で sendToSlack を直接実行すると message が undefined になる
+  // 動作確認は必ず testSlack() 関数経由で行う前提のため、ここで早期 return してログを残す
+  if (!message) {
+    Logger.log('[Slack] message が undefined または空。GAS エディタから直接実行した場合は testSlack() を選択して実行してください。');
+    return;
+  }
+  // URL の漏洩を避けつつ、設定の取り違えがあれば気付けるよう前後一部だけマスクして出力
+  const masked = webhookUrl.length > 36
+    ? webhookUrl.substring(0, 30) + '...' + webhookUrl.substring(webhookUrl.length - 6)
+    : '(短すぎる値)';
+  Logger.log('[Slack] webhook = ' + masked);
+  Logger.log('[Slack] payload length = ' + message.length);
+
   try {
-    UrlFetchApp.fetch(webhookUrl, {
+    const res = UrlFetchApp.fetch(webhookUrl, {
       method: 'post',
       contentType: 'application/json',
-      payload: JSON.stringify({ text: message })
+      payload: JSON.stringify({ text: message }),
+      muteHttpExceptions: true
     });
+    const code = res.getResponseCode();
+    const body = res.getContentText();
+    Logger.log('[Slack] status=' + code + ' body=' + body);
+    if (code < 200 || code >= 300) {
+      Logger.log('[Slack] 送信失敗（HTTP ' + code + '）。Webhook URL が無効・期限切れ・取消の可能性あり。');
+    }
   } catch (e) {
-    Logger.log('Slack送信失敗: ' + e.toString());
+    Logger.log('[Slack] 例外発生: ' + e.toString());
   }
+}
+
+/**
+ * GAS エディタからの動作確認用エントリポイント。
+ * 関数ドロップダウンで `testSlack` を選び ▶ 実行することで、引数を渡した状態で sendToSlack を呼べる。
+ * ステータスコード・本文をログで確認できる。
+ */
+function testSlack() {
+  const now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
+  sendToSlack('🧪 testSlack() 動作確認: ' + now);
 }
 
 /**
@@ -114,7 +146,7 @@ function buildSlackMessage(payload, masterRow, isError, errorMessage) {
     if (displayVal.startsWith("'")) {
       displayVal = displayVal.substring(1);
     }
-    lines.push(`• *${MASTER_HEADERS[i]}*: ${displayVal}`);
+    lines.push(`${MASTER_HEADERS[i]}: ${displayVal}`);
   }
 
   return headerText + lines.join('\n');
