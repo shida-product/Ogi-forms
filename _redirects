@@ -2,9 +2,9 @@
 # URL パス方式で店舗・言語の使い分けを実現する（B 案）
 
 # 渋谷店
-/shibuya       /index.html?store=shibuya       200
-/shibuya/en    /index_en.html?store=shibuya    200
+/shibuya       /index.html       200
+/shibuya/en    /index_en.html    200
 
 # 恵比寿店
-/ebisu         /index.html?store=ebisu         200
-/ebisu/en      /index_en.html?store=ebisu      200
+/ebisu         /index.html       200
+/ebisu/en      /index_en.html    200
