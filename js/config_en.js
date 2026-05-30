@@ -71,6 +71,7 @@ export const CONFIG = {
       required: true,
       section: 1,
       condition: (answers) => ['tourism', 'business'].includes(answers.residence_status),
+    },
     {
       id: 'address',
       type: 'text',
