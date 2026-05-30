@@ -71,14 +71,6 @@ export const CONFIG = {
       required: true,
       section: 1,
       condition: (answers) => ['tourism', 'business'].includes(answers.residence_status),
-    },
-    {
-      id: 'postal_code',
-      type: 'postal',
-      required: true,
-      section: 1,
-      condition: (answers) => ['resident', 'student', 'other'].includes(answers.residence_status),
-    },
     {
       id: 'address',
       type: 'text',
@@ -213,7 +205,6 @@ export const CONFIG = {
       nationality: 'Nationality',
       residence_status: 'Residence Status',
       address_hotel: 'Accommodation',
-      postal_code: 'Postal / Zip Code',
       address: 'Prefecture / City',
       address_detail: 'Street / Building / Room',
 
@@ -258,8 +249,7 @@ export const CONFIG = {
       email: 'e.g. example@email.com',
       nationality: 'e.g. USA',
       address_hotel: 'e.g. ABC Hotel, 1-2-3 Ebisu, Shibuya-ku, Tokyo',
-      postal_code: 'e.g. 1500041',
-      address: 'Autofills from Zip Code',
+      address: 'e.g. Shibuya-ku, Tokyo',
       address_detail: 'e.g. 1-2-3 Ebisu, ABC Condominium #101',
       allergy_detail: 'e.g. Peanuts, Penicillin',
       current_medicine_detail: 'e.g. Aspirin 100mg, Vitamin C',
@@ -272,7 +262,6 @@ export const CONFIG = {
     helpers: {
       full_name: 'As shown on your passport (A–Z only).',
       address_hotel: 'Hotel name only is fine. Google Maps address also works.',
-      postal_code: '7 digits auto-fills Prefecture & City (in Japanese).',
     },
 
     // Date Select Labels

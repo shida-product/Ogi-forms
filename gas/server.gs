@@ -249,11 +249,11 @@ class DataTransformer {
     const nameKanji = this.isJa ? this.ans.name_kanji : this.ans.full_name;
     const nameKana  = this.isJa ? this.ans.name_kana : '';
     // 生年月日：EN 版の旧 Google フォームは dob_year/month/day の 3 分割形式だったため後方互換で受け取り、
-    // 新システムは birth_date（YYYY-MM-DD）に統一済み。出力は YYYY/MM/DD で揃える。
+    // 新システムは birth_date（YYYY-MM-DD）に統一済み。出力は YYYYMMDD（8桁数字）に統一。
     const rawBirth  = this.ans.dob_year
       ? `${this.ans.dob_year}/${this.ans.dob_month}/${this.ans.dob_day}`
       : (this.ans.birth_date || '');
-    const birth     = String(rawBirth).replace(/-/g, '/');
+    const birth     = String(rawBirth).replace(/[-\/]/g, '');
     const zip       = this.isJa ? this.ans.postal_code : (this.ans.postal_code || '');
     const addr      = this.isJa ? `${this.ans.address || ''}${this.ans.address_detail || ''}` : `${this.ans.address || this.ans.address_hotel || ''} ${this.ans.address_detail || ''}`.trim();
     const phone     = this.isJa ? this.ans.phone : '';
@@ -380,4 +380,77 @@ class Repository {
     masterSheet.getRange(writeRow, 3).setNumberFormat('yyyy/MM/dd');
     masterSheet.getRange(writeRow, 1).insertCheckboxes();
   }
+}
+
+/**
+ * =====================================================================
+ * 【診断ツール】runDiagnostics()
+ * GASエディタのドロップダウンでこの関数を選んで ▶ 実行すると、
+ * 「スクリプトプロパティ」「スプレッドシート接続」「Slack通知」の
+ * 3項目を全店舗分チェックし、結果をログに出力します。
+ *
+ * 確認方法: 実行後、「実行数」→ 該当実行 →「ログ」を開いてください。
+ * =====================================================================
+ */
+function runDiagnostics() {
+  const props = PropertiesService.getScriptProperties();
+  const now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
+  Logger.log('=== 診断開始: ' + now + ' ===\n');
+
+  Object.keys(STORE_CONFIG).forEach(function(storeCode) {
+    const cfg = STORE_CONFIG[storeCode];
+    Logger.log('------ ' + cfg.name + '(' + storeCode + ') ------');
+
+    // --- 1. スクリプトプロパティの確認 ---
+    const sheetId    = props.getProperty(cfg.sheetIdKey);
+    const webhookUrl = props.getProperty(cfg.webhookKey);
+
+    Logger.log('[プロパティ] ' + cfg.sheetIdKey + ': ' + (sheetId    ? '✅ 設定済み (' + sheetId.substring(0, 8) + '...)' : '❌ 未設定'));
+    Logger.log('[プロパティ] ' + cfg.webhookKey + ': ' + (webhookUrl ? '✅ 設定済み' : '❌ 未設定'));
+
+    // --- 2. スプレッドシートへの接続テスト ---
+    if (sheetId) {
+      try {
+        const ss = SpreadsheetApp.openById(sheetId);
+        const sheetNames = ss.getSheets().map(function(s) { return s.getName(); }).join(', ');
+        Logger.log('[スプレッドシート] ✅ 接続成功: ' + ss.getName());
+        Logger.log('[スプレッドシート] シート一覧: ' + sheetNames);
+      } catch (e) {
+        Logger.log('[スプレッドシート] ❌ 接続失敗: ' + e.toString());
+      }
+    } else {
+      Logger.log('[スプレッドシート] ⏭ SHEET_ID未設定のためスキップ');
+    }
+
+    // --- 3. Slack Webhook 疎通テスト ---
+    if (webhookUrl) {
+      try {
+        const res = UrlFetchApp.fetch(webhookUrl, {
+          method: 'post',
+          contentType: 'application/json',
+          payload: JSON.stringify({ text: '🔧 [診断テスト] ' + cfg.name + ' への Slack 接続確認 (' + now + ')' }),
+          muteHttpExceptions: true,
+        });
+        const code = res.getResponseCode();
+        if (code >= 200 && code < 300) {
+          Logger.log('[Slack] ✅ 送信成功 (HTTP ' + code + ')');
+        } else {
+          Logger.log('[Slack] ❌ 送信失敗 (HTTP ' + code + '): ' + res.getContentText());
+        }
+      } catch (e) {
+        Logger.log('[Slack] ❌ 例外: ' + e.toString());
+      }
+    } else {
+      Logger.log('[Slack] ⏭ Webhook URL未設定のためスキップ');
+    }
+
+    Logger.log('');
+  });
+
+  // --- 4. GASコードバージョン確認 ---
+  Logger.log('------ GASコードバージョン確認 ------');
+  Logger.log('[STORE_CONFIG] 定義店舗数: ' + Object.keys(STORE_CONFIG).length + '店舗 (' + Object.keys(STORE_CONFIG).join(', ') + ')');
+  Logger.log('[DEFAULT_STORE] フォールバック店舗: ' + DEFAULT_STORE);
+  Logger.log('[API_TOKEN] トークン末尾4文字: ...' + API_TOKEN.slice(-4));
+  Logger.log('\n=== 診断完了 ===');
 }
