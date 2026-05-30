@@ -115,19 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
 });
 
-/** URLパラメータまたはパスから店舗を判定 */
+/** URLパラメータ（?store=）から店舗を判定 */
 function initStore() {
-  // 1. URLパスから店舗コードを抽出 (例: /ebisu/en -> ebisu, /shibuya -> shibuya)
-  const pathParts = window.location.pathname.split('/').filter(p => p);
-  // 言語コード（en）やファイル名を除外した最初のセグメントを取得
-  const pathStore = pathParts.find(p => p !== 'en' && p !== 'index.html' && p !== 'index_en.html');
-
-  // 2. URLパラメータから店舗コードを取得（後方互換・ローカルテスト用）
   const params = new URLSearchParams(window.location.search);
-  const paramStore = params.get('store');
-
-  // パス ➜ パラメータ ➜ デフォルト値 の優先順位で解決
-  const storeCode = pathStore || paramStore || CONFIG.defaultStore;
+  const storeCode = params.get('store') || CONFIG.defaultStore;
   const storeConfig = CONFIG.stores[storeCode];
 
   state.store = storeConfig ? storeCode : CONFIG.defaultStore;
