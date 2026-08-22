@@ -376,7 +376,7 @@ export const CONFIG = {
       phone: '数字のみ。ハイフンは自動で入ります。',
       postal_code: '半角数字7桁。住所が自動入力されます。',
       address: '郵便番号から自動入力されます。',
-      address_detail: '番地・建物名・部屋番号を正確にご入力ください。',
+      address_detail: '市区町村は不要です。番地・建物名・部屋番号のみご入力ください。',
       allergy_detail: '※選択肢にない場合は「その他」を選択してご記入ください。',
       side_effect_detail: '※具体的な薬の名前とその時の症状をご入力ください。',
       current_disease_detail: '※「その他」を選択した場合は具体的な病名や症状等をご入力ください。',

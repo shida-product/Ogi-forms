@@ -235,6 +235,19 @@ class DataTransformer {
   }
 
   /**
+   * 日本語住所を結合。番地欄が市区町村で始まっている場合は重複接頭辞を除去する。
+   * （郵便番号自動入力 + オートフィル/フル住所再入力による二重住所を防ぐ）
+   */
+  joinJapaneseAddress(address, detail) {
+    const base = address || '';
+    let rest = detail || '';
+    if (base && rest.indexOf(base) === 0) {
+      rest = rest.substring(base.length);
+    }
+    return base + rest;
+  }
+
+  /**
    * まとめ.js の30カラム (Index 0 ~ 29 => C列〜AF列) に完全に一致する配列を生成する
    * 副作用やアレルギーの「はい/いいえ」と「詳細」を別のセルに分ける。
    */
@@ -255,7 +268,9 @@ class DataTransformer {
       : (this.ans.birth_date || '');
     const birth     = String(rawBirth).replace(/[-\/]/g, '');
     const zip       = this.isJa ? this.ans.postal_code : (this.ans.postal_code || '');
-    const addr      = this.isJa ? `${this.ans.address || ''}${this.ans.address_detail || ''}` : `${this.ans.address || this.ans.address_hotel || ''} ${this.ans.address_detail || ''}`.trim();
+    const addr      = this.isJa
+      ? this.joinJapaneseAddress(this.ans.address, this.ans.address_detail)
+      : `${this.ans.address || this.ans.address_hotel || ''} ${this.ans.address_detail || ''}`.trim();
     const phone     = this.isJa ? this.ans.phone : '';
     const email     = this.ans.email || '';
     const occ       = this.isJa ? this.ans.occupation : '';

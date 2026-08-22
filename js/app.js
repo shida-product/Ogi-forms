@@ -291,6 +291,59 @@ function createFieldElement(field) {
   return wrapper;
 }
 
+// ── 住所の重複正規化 ──
+
+/** 番地欄から市区町村の重複接頭辞を除去 */
+function stripAddressPrefix(address, detail) {
+  const a = address || '';
+  const d = detail || '';
+  if (!a || !d) return d;
+  if (d.startsWith(a)) return d.slice(a.length).replace(/^\s+/, '');
+  return d;
+}
+
+/** address / address_detail の重複を state と DOM に反映 */
+function normalizeAddressAnswers() {
+  const address = state.answers.address || '';
+  const detail = state.answers.address_detail || '';
+  const normalized = stripAddressPrefix(address, detail);
+  if (normalized === detail) return;
+
+  state.answers.address_detail = normalized;
+  const detailField = document.getElementById('address_detail');
+  if (detailField && detailField.value !== normalized) {
+    detailField.value = normalized;
+  }
+  saveAnswers();
+}
+
+/**
+ * フィールドごとの autocomplete。
+ * 連絡先は意図的にオートフィル可、住所ブロックは別 section / 無効化して波及を防ぐ。
+ */
+function getAutocompleteForField(fieldId) {
+  switch (fieldId) {
+    case 'name_kanji':
+    case 'full_name':
+      return 'section-ogi-contact name';
+    case 'phone':
+      return 'section-ogi-contact tel';
+    case 'email':
+      return 'section-ogi-contact email';
+    case 'postal_code':
+      // 連絡先プロフィールとは切り離し、郵便番号単体の補完だけ許可
+      return 'section-ogi-postal postal-code';
+    case 'address':
+    case 'address_detail':
+    case 'address_hotel':
+      // 市区町村はAPI入力、番地は手入力。street-address 系だとフル住所が流れ込む
+      return 'chrome-off';
+    case 'name_kana':
+    default:
+      return 'off';
+  }
+}
+
 // ── 入力フィールド生成 ──
 
 function createTextInput(field) {
@@ -303,7 +356,7 @@ function createTextInput(field) {
   input.name = field.id;
   input.className = 'form-input';
   input.placeholder = T.placeholders[field.id] || '';
-  input.autocomplete = 'off';
+  input.autocomplete = getAutocompleteForField(field.id);
   if (field.type === 'tel') input.inputMode = 'tel';
   if (field.type === 'email') input.inputMode = 'email';
 
@@ -319,8 +372,13 @@ function createTextInput(field) {
       const digits = e.target.value.replace(/[^0-9]/g, '');
       state.answers[field.id] = digits;
       e.target.value = formatPhoneNumber(digits);
+    } else if (field.id === 'address_detail') {
+      const stripped = stripAddressPrefix(state.answers.address, e.target.value);
+      if (stripped !== e.target.value) e.target.value = stripped;
+      state.answers[field.id] = stripped;
     } else {
       state.answers[field.id] = e.target.value;
+      if (field.id === 'address') normalizeAddressAnswers();
     }
     clearError(field.id);
     saveAnswers();
@@ -635,7 +693,7 @@ function createPostalCodeInput(field) {
   input.placeholder = T.placeholders[field.id] || '';
   input.inputMode = 'numeric';
   input.maxLength = 8; // ハイフン込み: 123-4567
-  input.autocomplete = 'off';
+  input.autocomplete = getAutocompleteForField(field.id);
   if (state.answers[field.id]) {
     const d = state.answers[field.id];
     input.value = d.length > 3 ? d.substring(0, 3) + '-' + d.substring(3) : d;
@@ -698,13 +756,15 @@ async function fetchAddress(postalCode) {
       const result = data.results[0];
       const address = `${result.address1}${result.address2}${result.address3}`;
       state.answers.address = address;
-      saveAnswers();
 
       const addressField = document.getElementById('address');
       if (addressField) {
         addressField.value = address;
-        // inputイベントを発火してstateを同期させる
+        // inputイベントを発火してstateを同期させる（address_detail の重複除去も含む）
         addressField.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        normalizeAddressAnswers();
+        saveAnswers();
       }
 
       const detailField = document.getElementById('address_detail');
@@ -970,6 +1030,8 @@ async function submitForm() {
   if (spinner) spinner.classList.remove('hidden');
 
   try {
+    normalizeAddressAnswers();
+
     const payload = {
       store: state.store,
       lang: isEN ? 'en' : 'ja',
