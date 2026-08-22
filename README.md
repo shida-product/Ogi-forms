@@ -31,36 +31,41 @@
 ## ファイル構成
 
 ```text
-Ogi-forms/
-├── .gitignore
-├── _redirects          # Cloudflare Pages URLルーティング（パス方式）
-├── README.md
-├── index.html          # 日本語版 フォーム本体
-├── index_en.html       # 英語版 フォーム本体
-├── css/
-│   └── style.css       # カスタムスタイル（Linear & Solid デザイン）
-├── js/
-│   ├── app.js          # フォームエンジン（DOM生成・バリデーション・一時保存・送信）
-│   ├── config.js       # 日本語版 設定（i18n、フィールド定義、APIトークン、GAS URL、店舗設定）
-│   └── config_en.js    # 英語版 設定
-├── image/              # ロゴ画像
-└── gas/
-    ├── server.gs       # バックエンド（doPost、保存ロジック、Slack通知）
-    └── utils.gs        # スプレッドシート用ユーティリティ（和暦変換など）
+ogi-forms/                    # ワークスペース親（Git ではない）
+├── AGENTS.md                 # 親入口 → Keystone CORE + Ogi-forms/
+├── .agents/                  # 旧メモ・アーカイブ
+├── 現行版*.md / 現行版のGAS… # 旧 Google フォーム控え
+└── Ogi-forms/                # Git 正本（github.com/shida-product/Ogi-forms）
+    ├── AGENTS.md
+    ├── .agents/              # Keystone Tier0（RULES / handover / harness）
+    ├── .githooks/            # Keystone pre-commit シム
+    ├── _redirects
+    ├── README.md
+    ├── index.html / index_en.html
+    ├── css/ style.css
+    ├── js/ app.js, config.js, config_en.js
+    ├── image/
+    └── gas/ server.gs, utils.gs
 ```
+
+ローカルのディレクトリ名変更は本番 URL・現場 QR に影響しない。
 
 ## 主な機能
 
 ### フロントエンド
 - モバイル特化のステップ型フォーム（ステッパー表示）
 - リアルタイムバリデーション（フリガナ／電話番号／郵便番号／メール）
-- 郵便番号から住所自動入力
+- 郵便番号から住所自動入力（市区町村 → `address`、番地・建物 → `address_detail`）
+- **住所の二重入力防止**: 番地欄に市区町村が混入した場合、入力時・送信前に接頭辞を除去して正規化
+- **autocomplete の分離**: 氏名・電話・メールは連絡先としてオートフィル可。郵便番号は別 section。市区町村・番地はフル住所オートフィルを抑止（`chrome-off`）
 - **入力データの自動一時保存・復元**（localStorage）: 通信切断・画面誤閉じ時の再入力負担を解消し、送信成功時に自動クリーンアップ
 - 多言語対応（日本語 / English）
 - OSネイティブフォントによる高速描画
+- 生年月日は年・月・日の3プルダウン（現行維持）
 
 ### バックエンド（GAS）
 - **簡易APIトークン認証**: クライアントの `config.js` と `server.gs` の定数を照合し、外部からの直接リクエストやスパム送信を遮断
+- **日本語住所の結合時重複除去**: `address` + `address_detail` 連結時、詳細が市区町村で始まっていれば接頭辞を除去（フロント未適用時の二重住所をサーバーでも防ぐ）
 - スプレッドシート式インジェクション（CSV Injection）対策
 - 既存「回答まとめ」「回答NFC」シートへの同時書き込み
 - **Slack通知**: 正常送信時の通知に加え、シート書き込み失敗などの例外検知時に**緊急エラー通知**を行い、入力データをペイロード添付してデータ損失を防止
@@ -72,8 +77,10 @@ Ogi-forms/
 2. `main` ブランチにプッシュ → Cloudflare Pages が自動デプロイ
 
 ### バックエンド（GAS）
-1. `gas/server.gs` を GAS プロジェクトに貼り付け
-2. 「新しいデプロイ」を実行して Web App URL を取得
+> フォーム送信用 `gas/` には clasp 設定がない。変更時はエディタへ手動貼り付け → **新しいデプロイ**が必要（フロントの Pages 自動デプロイとは別）。
+
+1. `gas/server.gs`（必要なら `utils.gs`）を GAS プロジェクトに貼り付け
+2. 「新しいデプロイ」を実行して Web App URL を取得（既存デプロイの「新バージョン」でも可）
 3. 取得した URL を `js/config.js` / `js/config_en.js` の `gasUrl` に反映
 4. API トークン値を `apiToken`（クライアント） と `server.gs` の `API_TOKEN`（サーバー）で**完全一致**させる
 
